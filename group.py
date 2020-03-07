@@ -36,3 +36,6 @@ class Group:
 
     async def delete_channel(self):
         await self.channel.delete()
+
+    def get_id(self):
+        return self.channel.id
