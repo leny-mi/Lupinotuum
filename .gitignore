@@ -127,4 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-token.txt
+config.json
+config.json

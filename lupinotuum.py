@@ -1,4 +1,7 @@
+import json
+
 import discord
+
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -10,14 +13,17 @@ class MyClient(discord.Client):
             return
 
         if message.content == 'test':
-            #await message.channel.send('pong')
+            # await message.channel.send('pong')
             print("Received")
 
+
 client = MyClient()
-file = open("token.txt","r")
-token = file.readline()
+
+with open('config.json') as configfile:
+    data = json.load(configfile)
+
 try:
-    client.run(token)
+    client.run(data.token)
 except discord.errors.LoginFailure as exception:
     if str(exception) == 'Improper token has been passed.':
         print('Improper token has been passed. Did you forget to edit token.txt?')
