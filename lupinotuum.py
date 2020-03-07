@@ -23,7 +23,7 @@ with open('config.json') as configfile:
     data = json.load(configfile)
 
 try:
-    client.run(data.token)
+    client.run(data['token'])
 except discord.errors.LoginFailure as exception:
     if str(exception) == 'Improper token has been passed.':
         print('Improper token has been passed. Did you forget to edit token.txt?')
