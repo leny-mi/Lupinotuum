@@ -1,9 +1,10 @@
+
 # Lupinotuum
 A Bot to play Werewolf on Discord in real-time.
 
+# Usage
 
-Hi! I'm your first Markdown file in **StackEdit**. If you want to learn about StackEdit, you can read me. If you want to play with Markdown, you can edit me. Once you have finished with me, you can create new files by opening the **file explorer** on the left corner of the navigation bar.
-
+To host this bot yourself clone this repository. You'll have to enter your bot token in the `token.txt` file. Then just run `lupinotuum.py`.
 
 # Roles
 ### Town aligned roles
@@ -27,27 +28,24 @@ Hi! I'm your first Markdown file in **StackEdit**. If you want to learn about St
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
 ||||
 
-## Evil Roles
+### Evil Roles
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
+|Mafiosi|Vote to kill a player at night|-|
 |Werewolf|Vote to kill a player at night|-|
 |Alpha|Vote to kill a player at night|Only wins if no other werewolf survives|
+|Teenage Werewolf|Must say 'werewolf' once each day|-|
 |Vampire|May bite a player every even night|Only Vampires left|
 |Serial Killer|May kill a player every night|Has to be last survivor|
-|Collaborator|Is not part of werewolf chat|-|
-||||
-||||
+|Cultist|Is not part of werewolf chat|-|
 ||||
 ||||
 
-## Neutral Roles
+### Neutral Roles
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
 |Survivor|-|Wins if alive at the end|
 |Executioner|-|Wins if target is killed by the end of the game|
 |Guardian|-|Wins if target is alive by the end of the game|
 |Jester|-|Wins if he is lynched|
-
-
-
-
+|Universal|Gets the role of the first player to die|-|
