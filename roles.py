@@ -1,0 +1,31 @@
+from enum import Enum
+
+class Role(Enum):
+    VILLAGER = 0
+    SEER = 1
+    GUARDIAN_ANGEL = 2
+    WITCH = 3
+    HUNTER = 4
+    CUPID = 5
+    MAYOR = 6
+    APPRENTICE_SEER = 7
+    KNIGHT = 8
+    VIGILANTE = 9
+    RESURRECTIONIST = 10
+    MAILMAN = 11
+    ORACLE = 12
+    PRIEST = 13
+
+    MAFIOSI = 14
+    WEREWOLF = 15
+    ALPHA = 16
+    TEENAGE_WEREWOLF = 17
+    VAMPIRE = 18
+    SERIAL_KILLER = 19
+    CULTIST = 20
+
+    SURVIVOR = 21
+    EXECUTIONER = 22
+    PROTECTOR = 23
+    JESTER = 24
+    UNIVERSAL = 25 
