@@ -1,2 +1,0 @@
-<-- change this line -->
-Write your bot token on the first line
