@@ -2,12 +2,12 @@
 # Lupinotuum
 A Bot to play Werewolf on Discord in real-time.
 
-# Usage
+## Usage
 
-To host this bot yourself clone this repository. You'll have to enter your bot token in the `token.txt` file. Then just run `lupinotuum.py`.
+To host this bot yourself clone this repository. You'll have to create a `token.txt` and enter your bot token first line. Then just run `lupinotuum.py`.
 
-# Roles
-### Town aligned roles
+## Roles
+#### Town aligned roles
 
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
@@ -28,7 +28,7 @@ To host this bot yourself clone this repository. You'll have to enter your bot t
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
 ||||
 
-### Evil Roles
+#### Evil Roles
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
 |Mafiosi|Vote to kill a player at night|-|
@@ -41,7 +41,7 @@ To host this bot yourself clone this repository. You'll have to enter your bot t
 ||||
 ||||
 
-### Neutral Roles
+#### Neutral Roles
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
 |Survivor|-|Wins if alive at the end|
