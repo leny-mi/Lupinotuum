@@ -16,4 +16,10 @@ class MyClient(discord.Client):
 client = MyClient()
 file = open("token.txt","r")
 token = file.readline()
-client.run(token)
+try:
+    client.run(token)
+except LoginFailure as exception:
+    if str(exception) == 'Improper token has been passed.':
+        print('Improper token has been passed. Did you forget to edit token.txt?')
+    else:
+        print(exception)
