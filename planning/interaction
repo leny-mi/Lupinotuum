@@ -8,11 +8,12 @@ Game setup:
 4. $contine
 5. Choose character list (or create new character list)
 6. Assert everything completed
-7. Broadcast Roles (via dm)
-8. "Game with ID xxxxx will start at mm:hh on dd/mm/yyyy" (Game should always start with a day phase)
+8. "Please join here for private communication: ...."
+9. "Game with ID xxxxx will start at mm:hh on dd/mm/yyyy." (Game should always start with a day phase)
+10. Broadcast Roles (via dm)
 
 1b "Game already running."
 4b "Not enough players."
 6b "An error occured" or "The following error occured: xxx" -> maybe upload what lead to error
-
+9b "Not all players have joined, please join by mm:hh on dd/mm/yyyy"
 Create character list (in future)
