@@ -1,10 +1,19 @@
 
+
 # Lupinotuum
 A Bot to play Werewolf on Discord in real-time.
 
 ## Usage
 
-To host this bot yourself clone this repository. You'll have to create a `token.txt` and enter your bot token first line. Then just run `lupinotuum.py`.
+To host this bot yourself clone this repository. You'll have to create a `config.json` in `Lupinotuum/` and enter your bot token and a covert_server. Then just run `lupinotuum.py`.
+
+Your `config.json` might look like this
+
+    {
+      "token": "Dwa9aFW9saf68gwaf-faw80saf789fwa.fawXAawdfajigeoAIWZUk",
+      "covert_server": 4201333712345678910
+    }
+
 
 ## Roles
 #### Town aligned roles
