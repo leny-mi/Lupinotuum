@@ -7,11 +7,16 @@ A Bot to play Werewolf on Discord in real-time.
 
 To host this bot yourself clone this repository. You'll have to create a `config.json` in `Lupinotuum/` and enter your bot token and a covert_server. Then just run `lupinotuum.py`.
 
+The covert_server should be a server where private communication is managed using text_channels. Here the bot need permissions to create and modify channels.
+
+The invite link should be the last part of a generated invite link to your covert server. In the given case the link [https://discord.gg/PzYPTdr](https://discord.gg/PzYPTdr "https://discord.gg/PzYPTdr") has been generated which leads to `PzYPTdr` as the last part.
+
 Your `config.json` might look like this
 
     {
       "token": "Dwa9aFW9saf68gwaf-faw80saf789fwa.fawXAawdfajigeoAIWZUk",
       "covert_server": 4201333712345678910
+      "invite_link" : "PzYPTdr"
     }
 
 ## Task List
@@ -52,7 +57,8 @@ Your `config.json` might look like this
 |Mailman|May write a Message each night to be shown to the Town|-|
 |Oracle|May reveal a players role to another player but not themselves|-|
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
-|Brother|Knows the other Brothers|-|
+|Brothers|Knows the other Brothers|-|
+|Mason|Knows the other Masons|-|
 ||||
 
 #### Evil Roles
@@ -76,4 +82,3 @@ Your `config.json` might look like this
 |Guardian|-|Wins if target is alive by the end of the game|
 |Jester|-|Wins if he is lynched|
 |Universal|Gets the role of the first player to die|-|
-|Mason|Knows the other Masons|Wins with other Masons|
