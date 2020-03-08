@@ -28,4 +28,10 @@ class Role(Enum):
     EXECUTIONER = 201
     PROTECTOR = 202
     JESTER = 203
-    UNIVERSAL = 204 
+    UNIVERSAL = 204
+
+    def getRole(str):
+        for role in Role:
+            if role.name == str:
+                return role
+        return None
