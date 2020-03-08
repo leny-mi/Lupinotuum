@@ -14,6 +14,23 @@ Your `config.json` might look like this
       "covert_server": 4201333712345678910
     }
 
+## Task List
+
+- [ ] Interface
+	 - [x] Game Setup
+	 - [ ] Ingame interaction
+- [ ] Game logic
+	 - [ ] Main game
+	 - [ ] Usability
+		 - [x] Group management
+		 - [ ] Time management
+- [ ] Database
+	- [ ] Game state
+		- [ ] Save game state
+		- [ ] Recall game state
+	- [ ] Game setup
+
+
 
 ## Roles
 #### Town aligned roles
@@ -35,6 +52,7 @@ Your `config.json` might look like this
 |Mailman|May write a Message each night to be shown to the Town|-|
 |Oracle|May reveal a players role to another player but not themselves|-|
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
+|Brother|Knows the other Brothers|-|
 ||||
 
 #### Evil Roles
@@ -58,3 +76,4 @@ Your `config.json` might look like this
 |Guardian|-|Wins if target is alive by the end of the game|
 |Jester|-|Wins if he is lynched|
 |Universal|Gets the role of the first player to die|-|
+|Mason|Knows the other Masons|Wins with other Masons|
