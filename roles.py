@@ -1,6 +1,7 @@
 from enum import Enum
 
 class Role(Enum):
+    # Town roles
     VILLAGER = 0
     SEER = 1
     GUARDIAN_ANGEL = 2
@@ -15,7 +16,11 @@ class Role(Enum):
     MAILMAN = 11
     ORACLE = 12
     PRIEST = 13
+    BROTHER = 14
+    MASON = 15
+    BOMB = 16
 
+    # Evil roles
     MAFIOSI = 100
     WEREWOLF = 101
     ALPHA = 102
@@ -24,13 +29,14 @@ class Role(Enum):
     SERIAL_KILLER = 105
     CULTIST = 106
 
+    # Neutral roles
     SURVIVOR = 200
     EXECUTIONER = 201
     PROTECTOR = 202
     JESTER = 203
     UNIVERSAL = 204
 
-    def getRole(str):
+    def get_role(str):
         for role in Role:
             if role.name == str:
                 return role

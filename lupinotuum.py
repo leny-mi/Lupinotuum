@@ -3,6 +3,7 @@ import discord
 import utils
 from group import Group
 from roles import Role
+from presets import Preset
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -53,12 +54,29 @@ class MyClient(discord.Client):
                 self.state_map.pop(message.channel.id)
                 return
             self.count_map[message.channel.id] = count
-            await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$list`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. Type `$done` when you are finished or `$reset` to start over')
+            await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
 
             #TODO Print character list
 
+        elif (self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset '):
+            self.role_list[message.channel.id] = Preset.get_preset(message.content[8:], self.count_map[message.channel.id] + 1)
+            await message.channel.send("Set preset to "+message.content[8:])
+
+
+        elif (self.state_map[message.channel.id] == 1 and message.content == '$presetlist'):
+            tmessage = 'There are the following presets: ```'
+            for preset in Preset:
+                tmessage += "\n - " + preset.name
+            await message.channel.send(tmessage + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
+
+        elif (self.state_map[message.channel.id] == 1 and message.content[:12]== '$presetinfo '):
+            tmessage = 'Preset '+message.content[12:]+' contains: ```'
+            for role in Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
+                tmessage += "\n - " + role.name
+            await message.channel.send(tmessage + "```")
+
         # User writes $list and gets a display of all roles
-        elif (self.state_map[message.channel.id] == 1 and message.content == '$list'):
+        elif (self.state_map[message.channel.id] == 1 and message.content == '$rolelist'):
             print("List")
             tmessage = 'The following roles exist'
             for role in Role:
@@ -78,7 +96,7 @@ class MyClient(discord.Client):
 
         # User adds a role using '$addrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$addrole '):
-                role = Role.getRole(message.content[9:])
+                role = Role.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$list` to see all roles')
                     return
@@ -90,7 +108,7 @@ class MyClient(discord.Client):
 
         # User removes a role using '$delrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$delrole '):
-                role = Role.getRole(message.content[9:])
+                role = Role.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$current` to see the role list')
                     return
@@ -122,6 +140,9 @@ class MyClient(discord.Client):
                 data = json.load(configfile)
             await message.channel.send('Please join https://discord.gg/'+ data['invite_link'] +' for private communications\nGame with ID '+str(message.channel.id)+' will start at INSERT TIME on INSERT DATE')
             self.state_map[message.channel.id] = 2
+
+            #TODO INITIALIZE GAME HERE
+            
             #TODO Add list decoder
             #TODO Check list size
 
