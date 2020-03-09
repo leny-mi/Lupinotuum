@@ -82,9 +82,11 @@ Your `config.json` might look like this
 #### Neutral Roles
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
-|Survivor|-|Wins if alive at the end|
-|Executioner|-|Wins if target is killed by the end of the game|
-|Guardian|-|Wins if target is alive by the end of the game|
-|Jester|-|Wins if he is lynched|
-|Universal|May choose a role on the first night|-|
+|Survivor|-|Wins if he alive at the end|
+|Executioner|-|At the start of the game: Choose a target. Wins if target is eliminated by the end of the game|
+|Protector|-|At the start of the game: Choose a target. Wins if target is alive by the end of the game|
+|Jester|-|Wins if he is eliminated by the villager's vote|
+|Universal|At the beginning of the game: Choose a role on the first night. The role is kept until the end of the game|-|
 |Copycat|Gets the role of the first player to die|-|
+|Actor|Each night: May choose any of three provided roles and use the corresponding power until the next night. After a role has been chosen, it gets removed from the pool. Roles may not be Werewolf roles|-|
+||||
