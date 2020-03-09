@@ -47,7 +47,7 @@ Your `config.json` might look like this
 |Seer|View a players alignment each night|-|
 |Guardian Angel|Each night, choose a player to be protected during the night against the werewolves. Can choose himself, but not the same player twice in a row|-|
 |Alchemist|Has two potions, healing and poison, which can be used once each. Each night after being shown the victim, choose which potion to apply (or not to apply) on any player|-|
-|Hunter|After death may kill a player|-|
+|Hunter|If eliminated from the game, immediately eliminate any player of their choice|-|
 |Cupid|Chooses two players at the start to have altered win conditions|Also wins with the couple|
 |Mayor|Vote is worth twice as much|-|
 |Apprentice Seer|Becomes a Seer when the Seer dies|-|
