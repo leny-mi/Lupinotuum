@@ -1,5 +1,5 @@
-from roles import Role
-from time_difference import Time
+from game.roles import Role
+from usable.time_difference import Time
 from threading import Timer
 from datetime import timedelta, datetime
 import asyncio
@@ -49,7 +49,9 @@ class Game:
         #await self.schedule_event(0, 4, self.commence_day)
 
     async def time_scheduler(self):
+        await
         while True: #Edit to end at game end
+            await self.sleep_until(8, 0)
             await self.commence_day()
             await self.sleep_until(17, 30)
             await self.commence_vote()
@@ -59,7 +61,6 @@ class Game:
             await self.commence_tiebreaker()
             await self.sleep_until(20, 0)
             await self.commence_night()
-            await self.sleep_until(8, 0)
 
     async def sleep_until(self, hour, minute):
         x = datetime.utcnow()

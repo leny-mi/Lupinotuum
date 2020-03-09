@@ -1,5 +1,5 @@
 from enum import Enum
-from roles import Role
+from game.roles import Role
 import random
 
 class Preset(Enum):

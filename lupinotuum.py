@@ -1,10 +1,10 @@
 import json
 import discord
-import utils
-from group import Group
-from roles import Role
-from presets import Preset
-from game import Game
+from usable import utils
+from usable.group import Group
+from game.roles import Role
+from game.presets import Preset
+from game.game import Game
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -29,10 +29,14 @@ class MyClient(discord.Client):
         elif (message.content == "$setup"):
             await message.channel.send('Game is already running. There can only be ohne game per text channel.')
 
+        # User uses "info"
+        await self.information_calls(message)
+
+        # Debug
         await self.debugCommands(message)
 
 
-    # Handles Game setup such as "setup, continue, reset, list, role, done"
+    # Handles Game setup such as "setup, continue, reset, listpresets, addrole, delrole, current, done"
     async def setup(self, message):
         # GAME SETUP
 
@@ -58,38 +62,27 @@ class MyClient(discord.Client):
             self.count_map[message.channel.id] = count
             await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
 
-            #TODO Print character list
-
+        # Set a preset
         elif (self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset '):
             self.role_list[message.channel.id] = Preset.get_preset(message.content[8:], self.count_map[message.channel.id] + 1)
             await message.channel.send("Set preset to "+message.content[8:])
 
 
+        # Get all presets
         elif (self.state_map[message.channel.id] == 1 and message.content == '$presetlist'):
             tmessage = 'There are the following presets: ```'
             for preset in Preset:
                 tmessage += "\n - " + preset.name
             await message.channel.send(tmessage + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
 
+        # Get a certain preset
         elif (self.state_map[message.channel.id] == 1 and message.content[:12]== '$presetinfo '):
             tmessage = 'Preset '+message.content[12:]+' contains: ```'
             for role in Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
                 tmessage += "\n - " + role.name
             await message.channel.send(tmessage + "```")
 
-        # User writes $list and gets a display of all roles
-        elif (self.state_map[message.channel.id] == 1 and message.content == '$rolelist'):
-            print("List")
-            tmessage = 'The following roles exist'
-            for role in Role:
-                if role.value == 000:
-                    tmessage += "\nTown alligned roles:```"
-                elif role.value == 100:
-                    tmessage += "```Evil alligned roles: ```"
-                elif role.value == 200:
-                    tmessage += "```Neutral alligned roles: ```"
-                tmessage += ("\n - " + role.name)
-            await message.channel.send(tmessage + "```")
+
 
         # User writes $reset before completing setup
         elif (self.state_map[message.channel.id] <= 1 and message.content == '$reset'):
@@ -180,6 +173,44 @@ class MyClient(discord.Client):
             print("start debug york...")
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
             await self.game_map[message.channel.id].commence_day();
+
+    # Get information about roles or presets
+    async def information_calls(self, message):
+        # User writes $list and gets a display of all roles
+        if (message.content == '$rolelist'):
+            print("List")
+            tmessage = 'The following roles exist'
+            for role in Role:
+                if role.value == 000:
+                    tmessage += "\nTown alligned roles:```"
+                elif role.value == 100:
+                    tmessage += "```Evil alligned roles: ```"
+                elif role.value == 200:
+                    tmessage += "```Neutral alligned roles: ```"
+                tmessage += ("\n - " + role.name)
+            await message.channel.send(tmessage + "```")
+
+        elif (message.content[:6] == "$info "):
+            print("AM HERE")
+            role = Role.get_role(message.content[6:])
+            if role is None:
+                await message.channel.send('Invalid role. Use `$list` to see all roles')
+                return
+            with open('game/descriptions.json') as configfile:
+                print("am here")
+                data = json.load(configfile)
+                if message.content[6:] not in data:
+                    await message.channel.send('No role description available :(')
+                    return
+                stats = data[message.content[6:]]
+                embed = discord.Embed(color = 52224 if role.value < 100 else 7829367 if role.value >= 200 else 16711680,title = stats['name'], type = 'rich', description = "Role card")
+                embed.add_field(name = "Description", value = stats['description'], inline = False)
+                embed.add_field(name = "Abilities", value = stats['abilities'], inline = True)
+                embed.add_field(name = 'Alligment', value = stats['allignment'], inline = True)
+                embed.add_field(name = 'Usage', value = stats['usage'], inline = False)
+                await message.channel.send("", embed = embed)
+
+
 
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
