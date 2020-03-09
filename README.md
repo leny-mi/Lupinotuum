@@ -1,5 +1,6 @@
 
 
+
 # Lupinotuum
 A Bot to play Werewolf on Discord in real-time.
 
@@ -45,7 +46,7 @@ Your `config.json` might look like this
 |Villager|-|-|
 |Seer|View a players alignment each night|-|
 |Guardian Angel|Guard a player each night. Player cannot die|-|
-|Witch|Save a player once each game. Kill a player once each game|-|
+|Alchemist|Save a player once each game. Kill a player once each game|-|
 |Hunter|After death may kill a player|-|
 |Cupid|Chooses two players at the start to have altered win conditions|Also wins with the couple|
 |Mayor|Vote is worth twice as much|-|
@@ -71,8 +72,8 @@ Your `config.json` might look like this
 |Vampire|May bite a player every even night|Only Vampires left|
 |Serial Killer|May kill a player every night|Has to be last survivor|
 |Cultist|Is not part of werewolf chat|-|
-||||
-||||
+|Ancient Werewolf|Once may convert someone to a werewolf instead of killing them|-|
+|Witch|May inhibit a night activity each night|-|
 
 #### Neutral Roles
 |Role                           |Ability                      |Special win condition
@@ -81,4 +82,5 @@ Your `config.json` might look like this
 |Executioner|-|Wins if target is killed by the end of the game|
 |Guardian|-|Wins if target is alive by the end of the game|
 |Jester|-|Wins if he is lynched|
-|Universal|Gets the role of the first player to die|-|
+|Universal|May choose a role on the first night|-|
+|Copycat|Gets the role of the first player to die|-|

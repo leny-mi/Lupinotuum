@@ -30,7 +30,8 @@ class Role(Enum):
     VAMPIRE = 104
     SERIAL_KILLER = 105
     CULTIST = 106
-    WITCH = 107
+    ANCIENT = 107
+    WITCH = 108
 
     # Neutral roles
     SURVIVOR = 200
@@ -38,6 +39,7 @@ class Role(Enum):
     PROTECTOR = 202
     JESTER = 203
     UNIVERSAL = 204
+    COPYCAT = 205
 
     def get_role(str):
         for role in Role:
