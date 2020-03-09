@@ -61,6 +61,7 @@ Your `config.json` might look like this
 |Brothers|Knows the other Brothers|-|
 |Mason|Knows the other Masons|-|
 |Villager-Villager|Their role as a villager is visible to all players|-|
+|Fox|Once: Choose any three players. If there is at least one werewolf amongst them, keep this ability|-|
 ||||
 
 #### Evil Roles
