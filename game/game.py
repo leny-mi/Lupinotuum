@@ -14,6 +14,9 @@ class Game:
         self.character_list = character_list
         self.time = Time(timezone)
 
+    async def commence_inital(self):
+        await self.interface.game_broadcast(self.id, "Initializing game")
+
     async def commence_day(self):
         #TODO Day stuff
         #asyncio.set_event_loop(asyncio.new_event_loop())
@@ -49,7 +52,14 @@ class Game:
         #await self.schedule_event(0, 4, self.commence_day)
 
     async def time_scheduler(self):
-        await
+        if time.seconds_until(19, 0) < 3600:
+            ## TODO: Announce game start in 1h
+            await asyncio.sleep(3600)
+        else:
+            ## TODO: Annouce game start at 19:00
+            await sleep_until(19, 0)
+
+        await commence_inital()
         while True: #Edit to end at game end
             await self.sleep_until(8, 0)
             await self.commence_day()
@@ -63,11 +73,6 @@ class Game:
             await self.commence_night()
 
     async def sleep_until(self, hour, minute):
-        x = datetime.utcnow()
-        y = self.time.get_time(x.replace(hour = hour, minute = minute, second = 0, microsecond = 0)).replace(tzinfo=None)
-        delta_t = y - x
-        secs = delta_t.seconds + 1
+        secs = time.seconds_until(hour, minute)
         print("Seconds to next event "+str(secs))
-        if secs < 1:
-            secs += 3600*24
         await asyncio.sleep(secs)

@@ -9,4 +9,8 @@ class Time:
         self.tz = pytz.timezone(zone)
 
     def get_time(self, time):
-        return self.tz.localize(time).astimezone(pytz.utc)
+        return self.tz.localize(time).astimezone(timezone("UTC"))
+
+    def seconds_until(self, hour, minute):
+        now = timezone("UTC").localize(datetime.utcnow())
+        return (self.get_time(datetime(year = now.year, month = now.month, day = now.day, hour = hour, minute = minute)) - now).seconds
