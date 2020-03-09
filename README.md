@@ -60,6 +60,7 @@ Your `config.json` might look like this
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
 |Brothers|Knows the other Brothers|-|
 |Mason|Knows the other Masons|-|
+|Villager-Villager|Their role as a villager is visible to all players|-|
 ||||
 
 #### Evil Roles
