@@ -1,36 +1,38 @@
-Day phase:
-
+Day phase: 08:00
 "Day [NUMBER] has started."
 "Player [PLAYER] has been killed by a [ROLE]."
 Remove killed player from all groups
 "[NUMBER] players are still alive."
 "Day will end at mm:hh UST" maybe time zone setting
 
-Voting phase:
+Voting phase: 17:30
 "Voting phase has started."
-Print playerlist with ID: 
+Print playerlist with ID:
 "[ID] [PLAYER],
  [ID] [PLAYER],
 ..."
 "Vote by writing direct message '$vote ID' to @Botuser. (Write '$vote ID [GAMEID]' if you play multiple games."
 "Voting will end at mm:hh UST"
 
-Hang phase:
+Hang phase: 18:40
 "Voting has concluded."
 Print voting list:
 "[PLAYER] voted for [PLAYER],
  [PLAYER] abstained from voting,
 ..."
-Optional:
-	"There has been a tie between [PLAYER],... and [PLAYER] each having [NUMBER] votes."	
+Optional: 18:40
+	"There has been a tie between [PLAYER],... and [PLAYER] each having [NUMBER] votes."
 	"Vote again for a named player until mm:hh UST. On the next tie no one will die"
-	Optional:
+	Optional: 19:00
 		"No one will be hung today..." terminate phase.
 "[PLAYER] will be hung today at mm:hh UST."
 wait
 "[PLAYER] has been hung."
 "The day will end at mm:hh UST"
 
-Night phase:
+Night phase: 20:00
 "The day has ended."
-Execute Night Abilites
+Execute Night Abilities
+
+Post-Night phase: 23:00
+Execute Post Night Abilities
