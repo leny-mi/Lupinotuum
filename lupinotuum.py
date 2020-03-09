@@ -194,6 +194,8 @@ class MyClient(discord.Client):
             print("List")
             tmessage = 'The following roles exist'
             for role in Role:
+                if role.value == -1:
+                    continue
                 if role.value == 000:
                     tmessage += "\nTown alligned roles:```"
                 elif role.value == 100:
@@ -216,7 +218,17 @@ class MyClient(discord.Client):
                     await message.channel.send('No role description available :(')
                     return
                 stats = data[message.content[6:]]
-                embed = discord.Embed(color = 52224 if role.value < 100 else 7829367 if role.value >= 200 else 16711680,title = stats['name'], type = 'rich', description = "Role card")
+                #color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
+                if role.value == -1:
+                    color = 10066176
+                elif role.value < 100:
+                    color = 52224
+                elif role.value < 200:
+                    color = 16711680
+                else:
+                    color = 7829367
+
+                embed = discord.Embed(color = color ,title = stats['name'], type = 'rich', description = "Role card")
                 embed.add_field(name = "Description", value = stats['description'], inline = False)
                 embed.add_field(name = "Abilities", value = stats['abilities'], inline = True)
                 embed.add_field(name = 'Alligment', value = stats['allignment'], inline = True)

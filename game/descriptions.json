@@ -42,20 +42,7 @@
     "allignment": "Village",
     "usage": "Use `$kill PLAYER` after death to kill a player. Remember that this ability is only available shortly after death and becomes unusable if waiting for too long"
   },
-  : {
-    "name": "",
-    "description": "",
-    "abilities": "",
-    "allignment": "",
-    "usage": ""
-  },
-  : {
-    "name": "",
-    "description": "",
-    "abilities": "",
-    "allignment": "",
-    "usage": ""
-  }
+  
 
   "WITCH": {
     "name": "The Witch",
