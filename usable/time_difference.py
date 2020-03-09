@@ -11,6 +11,9 @@ class Time:
     def get_time(self, time):
         return self.tz.localize(time).astimezone(timezone("UTC"))
 
+    def get_reverse_time(self, time):
+        return timezone("UTC").localize(time).astimezone(self.tz)
+
     def seconds_until(self, hour, minute):
         now = timezone("UTC").localize(datetime.utcnow())
         return (self.get_time(datetime(year = now.year, month = now.month, day = now.day, hour = hour, minute = minute)) - now).seconds

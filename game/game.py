@@ -52,14 +52,20 @@ class Game:
         #await self.schedule_event(0, 4, self.commence_day)
 
     async def time_scheduler(self):
-        if time.seconds_until(19, 0) < 3600:
+        if self.time.seconds_until(19, 0) < 3600:
             ## TODO: Announce game start in 1h
+            await self.interface.game_broadcast(self.id, "Game will start at " + self.time.get_reverse_time(datetime.now()+timedelta(hour = 1)).strftime("%b %d %Y %H:%M:%S"))
             await asyncio.sleep(3600)
         else:
-            ## TODO: Annouce game start at 19:00
-            await sleep_until(19, 0)
+            ## TODO: EDIT FOR NEXXT DAY
+            await self.interface.game_broadcast(self.id, "Game will start at " + datetime.now().replace(hour = 19, minute = 0, second = 0, microsecond = 0).strftime("%b %d %Y %H:%M:%S"))
 
-        await commence_inital()
+            await self.sleep_until(19, 0)
+
+        await self.sleep_until(20, 0)
+        await self.commence_night()
+
+        await self.commence_inital()
         while True: #Edit to end at game end
             await self.sleep_until(8, 0)
             await self.commence_day()
@@ -73,6 +79,6 @@ class Game:
             await self.commence_night()
 
     async def sleep_until(self, hour, minute):
-        secs = time.seconds_until(hour, minute)
+        secs = self.time.seconds_until(hour, minute)
         print("Seconds to next event "+str(secs))
         await asyncio.sleep(secs)
