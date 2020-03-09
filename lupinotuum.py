@@ -179,7 +179,7 @@ class MyClient(discord.Client):
         if message.content == 'new_york':
             print("start debug york...")
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
-            await self.game_map[message.channel.id].commence_day();
+            await self.game_map[message.channel.id].time_scheduler();
 
         if message.content == 'onservermou':
             await message.channel.send("Result: "+ str(utils.check_all_players_joined(self, [298488132255350784])))
@@ -209,7 +209,7 @@ class MyClient(discord.Client):
             print("AM HERE")
             role = Roles.get_role(message.content[6:])
             if role is None:
-                await message.channel.send('Invalid role. Use `$list` to see all roles')
+                await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return
             with open('game/descriptions.json') as configfile:
                 print("am here")
