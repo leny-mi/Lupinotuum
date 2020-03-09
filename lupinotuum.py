@@ -55,7 +55,8 @@ class MyClient(discord.Client):
             self.state_map[message.channel.id] = 1
             message = await message.channel.fetch_message(self.react_map[message.channel.id].id)
             count = list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].count - 1
-            if count < 0: #TODO Enable this filter again (set on 4)
+            if count < 0: ## TODO:  Enable this filter again (set on 4)
+                count = max(4, count) ## TODO:  Remove this after debug phase
                 await message.channel.send("Not enough players. There should be at least 4")
                 self.state_map.pop(message.channel.id)
                 return
@@ -130,6 +131,12 @@ class MyClient(discord.Client):
 
         # User writes $done after adding enough roles
         elif (self.state_map[message.channel.id] == 1 and message.content == '$done' and len(self.role_list[message.channel.id]) > self.count_map[message.channel.id]):
+            if min(map(lambda x:x.value, self.role_list[message.channel.id])) >= 100:
+                await message.channel.send('There should be at least one town alligned role')
+                return
+            if max(map(lambda x:x.value%200, self.role_list[message.channel.id])) < 100:
+                await message.channel.send('There should be at least one evil alligend role')
+                return
             await message.channel.send('The following roles will be distributed:' + utils.format_role_list(self.role_list[message.channel.id]))
             with open('config.json') as configfile:
                 data = json.load(configfile)
