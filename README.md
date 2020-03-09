@@ -45,7 +45,7 @@ Your `config.json` might look like this
 |-------------------------------|-----------------------------|---------|
 |Villager|-|-|
 |Seer|View a players alignment each night|-|
-|Guardian Angel|Guard a player each night. Player cannot die|-|
+|Guardian Angel|Each night, choose a player to be protected during the night against the werewolves. Can choose himself, but not the same player twice in a row|-|
 |Alchemist|Save a player once each game. Kill a player once each game|-|
 |Hunter|After death may kill a player|-|
 |Cupid|Chooses two players at the start to have altered win conditions|Also wins with the couple|
