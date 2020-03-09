@@ -1,4 +1,5 @@
 import json
+import discord
 # Check for correct json
 def checkJson():
     try:
@@ -18,3 +19,10 @@ def checkJson():
 # Print all roles in a readable way
 def format_role_list(roles):
     return "\n - " + ("\n - ".join(map(lambda x: str(roles.count(x)) + 'x ' + x.name, list(set(roles)))))
+
+def check_all_players_joined(client, player_list):
+    with open('config.json') as configfile:
+        data = json.load(configfile)
+        s = set(map(lambda x: x.id, client.get_guild(data['covert_server']).members))
+        print(s)
+        return set(player_list).issubset(s)

@@ -174,6 +174,12 @@ class MyClient(discord.Client):
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
             await self.game_map[message.channel.id].commence_day();
 
+        if message.content == 'onservermou':
+            await message.channel.send("Result: "+ str(utils.check_all_players_joined(self, [298488132255350784])))
+
+        if message.content == 'onservernon':
+            await message.channel.send("Result: "+ str(utils.check_all_players_joined(self, [270240574748098561])))
+
     # Get information about roles or presets
     async def information_calls(self, message):
         # User writes $list and gets a display of all roles
