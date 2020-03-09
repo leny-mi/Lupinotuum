@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Role(Enum):
+class Roles(Enum):
     # Town roles
     NARRATOR = -1
 
@@ -42,7 +42,7 @@ class Role(Enum):
     COPYCAT = 205
 
     def get_role(str):
-        for role in Role:
+        for role in Roles:
             if role.name == str:
                 return role
         return None

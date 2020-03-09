@@ -2,7 +2,7 @@ import json
 import discord
 from usable import utils
 from usable.group import Group
-from game.roles import Role
+from game.roles import Roles
 from game.presets import Preset
 from game.game import Game
 
@@ -92,7 +92,7 @@ class MyClient(discord.Client):
 
         # User adds a role using '$addrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$addrole '):
-                role = Role.get_role(message.content[9:])
+                role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$list` to see all roles')
                     return
@@ -104,7 +104,7 @@ class MyClient(discord.Client):
 
         # User removes a role using '$delrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$delrole '):
-                role = Role.get_role(message.content[9:])
+                role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$current` to see the role list')
                     return
@@ -193,7 +193,7 @@ class MyClient(discord.Client):
         if (message.content == '$rolelist'):
             print("List")
             tmessage = 'The following roles exist'
-            for role in Role:
+            for role in Roles:
                 if role.value == -1:
                     continue
                 if role.value == 000:
@@ -207,7 +207,7 @@ class MyClient(discord.Client):
 
         elif (message.content[:6] == "$info "):
             print("AM HERE")
-            role = Role.get_role(message.content[6:])
+            role = Roles.get_role(message.content[6:])
             if role is None:
                 await message.channel.send('Invalid role. Use `$list` to see all roles')
                 return

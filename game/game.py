@@ -1,4 +1,4 @@
-from game.roles import Role
+from game.roles import Roles
 from usable.time_difference import Time
 from threading import Timer
 from datetime import timedelta, datetime
