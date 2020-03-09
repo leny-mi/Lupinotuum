@@ -20,7 +20,7 @@ class Roles(Enum):
     PRIEST = 13
     BROTHER = 14
     MASON = 15
-    BOMB = 16
+    BOMBSHELL = 16
 
     # Evil roles
     MAFIOSI = 100

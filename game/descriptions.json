@@ -19,14 +19,14 @@
     "description": "The Seer is an interpreter for signs provided from above. They use countless methods to obtain knowledge and protect their village",
     "abilities": "See a players alligment each night",
     "allignment": "Village",
-    "usage": "Use `$see MEMBER` at night in a private chat with the moderator to view a players allignment"
+    "usage": "Use `$see MEMBER` at night in a private chat with the Narrator to view a players allignment"
   },
   "GUARDIAN_ANGEL": {
     "name": "The Guardian Angel",
     "description": "The Guardian Angel is a protector and guide to those he trusts",
     "abilities": "May protect a player each night",
     "allignment": "Village",
-    "usage": "User `guard PLAYER` at night in a private chat with the moderator to view a players allignment"
+    "usage": "User `guard PLAYER` at night in a private chat with the Narrator to view a players allignment"
   },
   "ALCHEMIST": {
     "name": "The Alchemist",
@@ -42,7 +42,55 @@
     "allignment": "Village",
     "usage": "Use `$kill PLAYER` after death to kill a player. Remember that this ability is only available shortly after death and becomes unusable if waiting for too long"
   },
-  
+  "CUPID": {
+    "name": "Cupid",
+    "description": "The god of desire, erotic love, attraction and affection and a son of Venus and Mars",
+    "abilities": "Can make two players fall in love on the first night. They can't live without each other and may win as the final pair",
+    "allignment": "Village",
+    "usage": "Use `pair PLAYER1 PLAYER2` on the first night to make two players fall in love"
+  },
+  "MAYOR": {
+    "name": "The Mayor",
+    "description": "The highest-ranking official in a municipal government such as the Village",
+    "abilities": "Has more voting power than the average Villager",
+    "allignment": "Village",
+    "usage": "None"
+  },
+  "APPRENTICE_SEER": {
+    "name": "The Apprentice Seer",
+    "description": "An Apprentice to the divine Seer, knowledgeable enough to take their place, should something occur",
+    "abilities": "Becomes a Seer once another Seer dies",
+    "allignment": "Village",
+    "usage": "None"
+  },
+  "KNIGHT": {
+    "name": "The Knight",
+    "description": "The Knight, holder of an honorary title of knighthood, powerfull enough to withstand a nightly blow without falling",
+    "abilities": "Survives the first time being attacked",
+    "allignment": "Village",
+    "usage": "None"
+  },
+  "VIGILANTE": {
+    "name": "The Vigilante",
+    "description": "The Vigilante, bringer of their own law",
+    "abilities": "May kill two players per game, but at most one per night",
+    "allignment": "Village",
+    "usage": "Use `kill PLAYER` at night in a private chat with the Narrator to choose a player to shoot"
+  },
+  "BOMBSHELL": {
+    "name": "The Bombshell",
+    "description": "The Bombshell, an explosive sleeper willing to bind their fate to that of their murderer",
+    "abilities": "Will kill their murderer",
+    "allignment": "Village",
+    "usage": "None"
+  },
+  "RESURRECTIONIST": {
+    "name": "The Resurrectionist",
+    "description": "The Resurrectionist, a divine believer able to cross the barrier, seperating us from the deceased",
+    "abilities": "May once ressurect another player",
+    "allignment": "Village",
+    "usage": "Use `$ressurect PLAYER` at night in a private chat with the Narrator to revive the selected player"
+  },
 
   "WITCH": {
     "name": "The Witch",
