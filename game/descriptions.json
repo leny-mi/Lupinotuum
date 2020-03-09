@@ -7,19 +7,19 @@
     "usage": "Nunc nec sapien nisi. Nunc congue consectetur tellus non mollis. Nam pretium urna sit amet arcu tincidunt, vitae mattis erat interdum. Nullam ligula turpis, convallis congue lacinia nec, venenatis auctor dolor. Curabitur eget nulla at neque iaculis ultrices ut in lectus. In hac habitasse platea dictumst. Mauris tincidunt enim eu scelerisque cursus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce vel finibus purus. Maecenas tincidunt venenatis tempor. Mauris neque erat, varius sit amet suscipit et, pharetra ut nulla. "
   },
   "SEER": {
-    "name": "Seer",
-    "description": "Something",
-    "abilities": "Something",
-    "allignment": "Town",
-    "usage": "See stuff"
+    "name": "The Seer",
+    "description": "The Seer is an interpreter for signs provided from above. They use countless methods to obtain knowledge and protect their village",
+    "abilities": "See a players alligment",
+    "allignment": "Village",
+    "usage": "Use `$see MEMBER` at night in a private chat with the moderator to view a players allignment"
   },
 
   "UNIVERSAL": {
-    "name": "Universal",
-    "description": "Univeral Pictures",
-    "abilities": "Filme machen",
-    "allignment": "Very neutral",
-    "usage": "Make Movie"
+    "name": "The Universal",
+    "description": "The Univeral is a practitioner of diverse arts, suitable for many tasks. The Univeral controls their own fate",
+    "abilities": "Can choose their role",
+    "allignment": "None, will change on first day",
+    "usage": "Use `$choose ROLE` to pick a role. This action has to be completed by the first night. If not, the Universal will become a regular Villager"
   },
 
 
