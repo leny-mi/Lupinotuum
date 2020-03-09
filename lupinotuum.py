@@ -4,6 +4,7 @@ import utils
 from group import Group
 from roles import Role
 from presets import Preset
+from game import Game
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -13,6 +14,7 @@ class MyClient(discord.Client):
         self.react_map = {} #Map channel to react message
         self.role_list = {} #Map channel to role list
         self.count_map = {} #Map channel to count
+        self.game_map  = {} #Map channel to game
 
     async def on_message(self, message):
         # Don't react to bots
@@ -142,7 +144,7 @@ class MyClient(discord.Client):
             self.state_map[message.channel.id] = 2
 
             #TODO INITIALIZE GAME HERE
-            
+
             #TODO Add list decoder
             #TODO Check list size
 
@@ -169,6 +171,15 @@ class MyClient(discord.Client):
         if message.content == 'del':
             print("deleting")
             await self.c.delete_channel()
+
+        if message.content == 'berlin':
+            print("start debug berlin...")
+            self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'Europe/Berlin')
+            await self.game_map[message.channel.id].time_scheduler();
+        if message.content == 'new_york':
+            print("start debug york...")
+            self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
+            await self.game_map[message.channel.id].commence_day();
 
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
