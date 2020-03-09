@@ -2,10 +2,12 @@ from enum import Enum
 
 class Role(Enum):
     # Town roles
+    NARRATOR = -1
+
     VILLAGER = 0
     SEER = 1
     GUARDIAN_ANGEL = 2
-    WITCH = 3
+    ALCHEMIST = 3
     HUNTER = 4
     CUPID = 5
     MAYOR = 6
@@ -28,6 +30,7 @@ class Role(Enum):
     VAMPIRE = 104
     SERIAL_KILLER = 105
     CULTIST = 106
+    WITCH = 107
 
     # Neutral roles
     SURVIVOR = 200
