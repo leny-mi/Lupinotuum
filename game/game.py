@@ -62,10 +62,11 @@ class Game:
 
             await self.sleep_until(19, 0)
 
+        await self.commence_inital()
+
         await self.sleep_until(20, 0)
         await self.commence_night()
 
-        await self.commence_inital()
         while True: #Edit to end at game end
             await self.sleep_until(8, 0)
             await self.commence_day()
