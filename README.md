@@ -70,14 +70,15 @@ Your `config.json` might look like this
 |Role                           |Ability                      |Special win condition
 |-------------------------------|-----------------------------|---------|
 |Mafiosi|Vote to kill a player at night|-|
-|Werewolf|Vote to kill a player at night|-|
-|Alpha|Vote to kill a player at night|Only wins if no other werewolf survives|
+|Werewolf|Each night, devour a villager. Can not devour another werewolf|-|
+|Alpha Werewolf|Acts as a normal werewolf. Wakes up a second time and devours a second victim as long as no other werewolf has been eliminated|-|
+|White Werewolf|Acts as a normal werewolf|Wins if he is the last werewolf remaining|
 |Teenage Werewolf|Must say 'werewolf' once each day|-|
 |Vampire|May bite a player every even night|Only Vampires left|
 |Serial Killer|May kill a player every night|Has to be last survivor|
 |Cultist|Is not part of werewolf chat|-|
-|Ancient Werewolf|Once may convert someone to a werewolf instead of killing them|-|
-|Witch|May inhibit a night activity each night|-|
+|Ancient Werewolf|Acts as a normal werewolf. Once: Infect the victim. The infected inhabitant becomes a Werewolf but also keeps his other identity and isn't devoured.|-|
+|Witch|Each night: May choose a player. This players ability is inhibited during the night|-|
 
 #### Neutral Roles
 |Role                           |Ability                      |Special win condition
