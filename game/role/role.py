@@ -1,8 +1,6 @@
-from flags import Flags
+from .flags import Flags
 import asyncio
 class Role:
-
-    role = None
 
     def __init__(self, player):
         self.player = player
@@ -28,14 +26,16 @@ class Role:
 
     async def on_trial(self, game):
         ## TODO: you are on trial
-        if Flags.GRACED in self.flags
+        if Flags.GRACED in self.flags:
+            pass
+            #DO DEATH
 
     async def on_hang(self, game):
         ## TODO: you have been hanged
         pass
 
     async def on_playerdeath(self, game, player, muderer_class):
-        pass
+        game.players_alive.remove(player)
 
     async def on_ressurect(self, game):
         pass

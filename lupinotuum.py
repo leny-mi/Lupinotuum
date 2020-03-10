@@ -2,7 +2,8 @@ import json
 import discord
 from usable import utils
 from usable.group import Group
-from game.roles import Roles
+#from game.roles import Roles
+from game.all_roles import *
 from game.presets import Preset
 from game.game import Game
 
@@ -15,6 +16,7 @@ class MyClient(discord.Client):
         self.role_list = {} #Map channel to role list
         self.count_map = {} #Map channel to count
         self.game_map  = {} #Map channel to game
+        self.player_map= {} #Map channel to player list
 
     async def on_message(self, message):
         # Don't react to bots
@@ -61,6 +63,9 @@ class MyClient(discord.Client):
                 self.state_map.pop(message.channel.id)
                 return
             self.count_map[message.channel.id] = count
+            self.player_map[message.channel.id] = set(map(lambda x: x.id,await list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].users().flatten()))
+            self.player_map[message.channel.id].remove(685910279070285877)
+            print(self.player_map[message.channel.id]) #DEBUG
             await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
 
         # Set a preset
@@ -92,7 +97,8 @@ class MyClient(discord.Client):
 
         # User adds a role using '$addrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$addrole '):
-                role = Roles.get_role(message.content[9:])
+                role = next(obj for obj in all_roles if obj.__name__.lower()==message.content[9:].lower())
+                #role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$list` to see all roles')
                     return
@@ -100,11 +106,12 @@ class MyClient(discord.Client):
                 if not message.channel.id in self.role_list:
                     self.role_list[message.channel.id] = []
                 self.role_list[message.channel.id].append(role)
-                await message.channel.send('Added '+message.content[9:]+' to role list')
+                await message.channel.send('Added '+message.content[9:].title()+' to role list')
 
         # User removes a role using '$delrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$delrole '):
-                role = Roles.get_role(message.content[9:])
+                role = next(obj for obj in all_roles if obj.__name__.lower()==message.content[9:].lower())
+                #role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$current` to see the role list')
                     return
@@ -112,10 +119,10 @@ class MyClient(discord.Client):
                 if not message.channel.id in self.role_list:
                     self.role_list[message.channel.id] = []
                 if role not in self.role_list[message.channel.id]:
-                    await message.channel.send(message.content[9:]+' not in role list')
+                    await message.channel.send(message.content[9:].title()+' not in role list')
                     return
                 self.role_list[message.channel.id].remove(role)
-                await message.channel.send('Removed '+message.content[9:]+' from role list')
+                await message.channel.send('Removed '+message.content[9:].title()+' from role list')
 
         # User removes a role using '$current ...'
         elif (self.state_map[message.channel.id] == 1 and message.content == '$current'):
@@ -144,9 +151,9 @@ class MyClient(discord.Client):
             self.state_map[message.channel.id] = 2
 
             #TODO INITIALIZE GAME HERE
-
-            #TODO Add list decoder
-            #TODO Check list size
+            ## TODO: ENTER TIME ZONE
+            self.game_map[message.channel.id] = Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
+            await self.game_map[message.channel.id].time_scheduler();
 
     # Debug stuff
     async def debugCommands(self, message):
@@ -172,6 +179,10 @@ class MyClient(discord.Client):
             print("deleting")
             await self.c.delete_channel()
 
+        if message.content == '.next':
+            print("Next")
+            self.game_map[message.channel.id].debug = 1
+
         if message.content == 'berlin':
             print("start debug berlin...")
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'Europe/Berlin')
@@ -193,31 +204,30 @@ class MyClient(discord.Client):
         if (message.content == '$rolelist'):
             print("List")
             tmessage = 'The following roles exist'
-            for role in Roles:
-                if role.value == -1:
-                    continue
-                if role.value == 000:
-                    tmessage += "\nTown alligned roles:```"
-                elif role.value == 100:
-                    tmessage += "```Evil alligned roles: ```"
-                elif role.value == 200:
-                    tmessage += "```Neutral alligned roles: ```"
-                tmessage += ("\n - " + role.name)
+            tmessage += "\nTown alligned roles:```"
+            for role in good_roles:
+                tmessage += ("\n - " + role.__name__)
+            tmessage += "```Evil alligned roles: ```"
+            for role in evil_roles:
+                tmessage += ("\n - " + role.__name__)
+            tmessage += "```Neutral alligned roles: ```"
+            for role in neutral_roles:
+                tmessage += ("\n - " + role.__name__)
+
             await message.channel.send(tmessage + "```")
 
         elif (message.content[:6] == "$info "):
             print("AM HERE")
-            role = Roles.get_role(message.content[6:])
-            if role is None:
+            if message.content[6:] not in all_roles:
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return
             with open('game/descriptions.json') as configfile:
                 print("am here")
                 data = json.load(configfile)
-                if message.content[6:] not in data:
+                if message.content[6:].upper() not in data:
                     await message.channel.send('No role description available :(')
                     return
-                stats = data[message.content[6:]]
+                stats = data[message.content[6:].upper()]
                 #color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
                 if role.value == -1:
                     color = 10066176
