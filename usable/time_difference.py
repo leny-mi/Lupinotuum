@@ -1,5 +1,4 @@
 from datetime import timedelta, datetime
-from pytz import timezone
 import pytz
 
 #https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
@@ -9,17 +8,17 @@ class Time:
         self.tz = pytz.timezone(zone)
 
     def get_time(self, time):
-        return self.tz.localize(time).astimezone(timezone("UTC"))
+        return self.tz.localize(time).astimezone(pytz.timezone("UTC"))
 
     def get_reverse_time(self, time):
-        return timezone("UTC").localize(time).astimezone(self.tz)
+        return pytz.timezone("UTC").localize(time).astimezone(self.tz)
 
     def seconds_until(self, hour, minute):
-        now = timezone("UTC").localize(datetime.utcnow())
+        now = pytz.timezone("UTC").localize(datetime.utcnow())
         return (self.get_time(datetime(year = now.year, month = now.month, day = now.day, hour = hour, minute = minute)) - now).seconds
 
     def get_next_time_string(self, hour, minute):
-        current = timezone("UTC").localize(datetime.utcnow()).astimezone(self.tz)
+        current = pytz.timezone("UTC").localize(datetime.utcnow()).astimezone(self.tz)
         next    = current.replace(hour = hour, minute = minute, second = 0, microsecond = 0)
 
         if (next < current):

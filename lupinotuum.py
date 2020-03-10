@@ -1,11 +1,17 @@
-import json
+
 import discord
+
 from usable import utils
+
 from usable.group import Group
 #from game.roles import Roles
-from game.roles import *
+#from game.roles import *
+from game import roles
+
 from game.presets import Preset
 from game.game import Game
+
+from data import datamanager
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -94,7 +100,7 @@ class MyClient(discord.Client):
 
         # User adds a role using '$addrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$addrole '):
-                role = next(obj for obj in all_roles if obj.__name__.lower()==message.content[9:].lower())
+                role = next(obj for obj in roles.all_roles if obj.__name__.lower()==message.content[9:].lower())
                 #role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$list` to see all roles')
@@ -107,7 +113,7 @@ class MyClient(discord.Client):
 
         # User removes a role using '$delrole ...'
         elif (self.state_map[message.channel.id] == 1 and message.content[0:9] == '$delrole '):
-                role = next(obj for obj in all_roles if obj.__name__.lower()==message.content[9:].lower())
+                role = next(obj for obj in roles.all_roles if obj.__name__.lower()==message.content[9:].lower())
                 #role = Roles.get_role(message.content[9:])
                 if role is None:
                     await message.channel.send('Invalid role. Use `$current` to see the role list')
@@ -135,16 +141,16 @@ class MyClient(discord.Client):
 
         # User writes $done after adding enough roles
         elif (self.state_map[message.channel.id] == 1 and message.content == '$done' and len(self.role_list[message.channel.id]) > self.count_map[message.channel.id]):
-            if good_roles & set(self.role_list[message.channel.id]) == set():
+            if roles.good_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one town alligned role')
                 return
-            if evil_roles & set(self.role_list[message.channel.id]) == set():
+            if roles.evil_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one evil alligend role')
                 return
             await message.channel.send('The following roles will be distributed:' + utils.format_role_list(self.role_list[message.channel.id]))
-            with open('config.json') as configfile:
-                data = json.load(configfile)
-            await message.channel.send('Please join https://discord.gg/'+ data['invite_link'] +' for private communications\nGame with ID '+str(message.channel.id)+' will start at INSERT TIME on INSERT DATE')
+            #with open('config.json') as configfile:
+            #    data = json.load(configfile)
+            await message.channel.send('Please join https://discord.gg/'+ datamanager.get_config('invite_link') +' for private communications\nGame with ID '+str(message.channel.id)+' will start at INSERT TIME on INSERT DATE')
             self.state_map[message.channel.id] = 2
 
             #TODO INITIALIZE GAME HERE
@@ -203,45 +209,44 @@ class MyClient(discord.Client):
             print("List")
             tmessage = 'The following roles exist'
             tmessage += "\nTown alligned roles:```"
-            for role in good_roles:
+            for role in roles.good_roles:
                 tmessage += ("\n - " + role.__name__)
             tmessage += "```Evil alligned roles: ```"
-            for role in evil_roles:
+            for role in roles.evil_roles:
                 tmessage += ("\n - " + role.__name__)
             tmessage += "```Neutral alligned roles: ```"
-            for role in neutral_roles:
+            for role in roles.neutral_roles:
                 tmessage += ("\n - " + role.__name__)
 
             await message.channel.send(tmessage + "```")
 
         elif (message.content[:6] == "$info "):
             print("AM HERE")
-            if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), all_roles)):
+            if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)):
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return
-            with open('game/descriptions.json') as configfile:
-                print("am here")
-                data = json.load(configfile)
-                if message.content[6:].upper() not in data:
-                    await message.channel.send('No role description available :(')
-                    return
-                stats = data[message.content[6:].upper()]
-                #color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
-                if message.content[6:].lower() == 'narrator':
-                    color = 10066176
-                elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), good_roles)):
-                    color = 52224
-                elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), evil_roles)):
-                    color = 16711680
-                else:
-                    color = 7829367
 
-                embed = discord.Embed(color = color ,title = stats['name'], type = 'rich', description = "Role card")
-                embed.add_field(name = "Description", value = stats['description'], inline = False)
-                embed.add_field(name = "Abilities", value = stats['abilities'], inline = True)
-                embed.add_field(name = 'Alligment', value = stats['allignment'], inline = True)
-                embed.add_field(name = 'Usage', value = stats['usage'], inline = False)
-                await message.channel.send("", embed = embed)
+            data = datamanager.get_description()
+            if message.content[6:].upper() not in data:
+                await message.channel.send('No role description available :(')
+                return
+            stats = data[message.content[6:].upper()]
+            #color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
+            if message.content[6:].lower() == 'narrator':
+                color = 10066176
+            elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), roles.good_roles)):
+                color = 52224
+            elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), roles.evil_roles)):
+                color = 16711680
+            else:
+                color = 7829367
+
+            embed = discord.Embed(color = color ,title = stats['name'], type = 'rich', description = "Role card")
+            embed.add_field(name = "Description", value = stats['description'], inline = False)
+            embed.add_field(name = "Abilities", value = stats['abilities'], inline = True)
+            embed.add_field(name = 'Alligment', value = stats['allignment'], inline = True)
+            embed.add_field(name = 'Usage', value = stats['usage'], inline = False)
+            await message.channel.send("", embed = embed)
 
 
 
@@ -259,17 +264,17 @@ class MyClient(discord.Client):
         self.state_map.pop(id)
 
 
-if not utils.checkJson():
+if not datamanager.check_json():
     print("Multiple errors have occured. Bot has not been started")
     quit()
 
 client = MyClient(activity = discord.Activity(name = 'Write $setup to start a game' , type = discord.ActivityType.custom))
 
-with open('config.json') as configfile:
-    data = json.load(configfile)
+#with open('config.json') as configfile:
+#    data = json.load(configfile)
 
 try:
-    client.run(data['token'])
+    client.run(datamanager.get_config('token'))
 except discord.errors.LoginFailure as exception:
     if str(exception) == 'Improper token has been passed.':
         print('Error: an improper token has been passed. Make sure that you added the correct token to config.json')

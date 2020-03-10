@@ -1,6 +1,6 @@
-from .flags import Flags
-from game.game import Game
 import asyncio
+
+from game.flags import Flags
 
 class Role:
 

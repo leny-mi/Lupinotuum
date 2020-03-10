@@ -1,9 +1,8 @@
-
-from game.role.role import Role
+from game import role
 
 # Good Roles
 
-class Good(Role):
+class Good(role.Role):
     pass
 
 class Hunter(Good):
@@ -68,7 +67,7 @@ class Lord(Good):
 
 # Evil Roles
 
-class Evil(Role):
+class Evil(role.Role):
     pass
 
 class Alpha(Evil):
@@ -104,7 +103,7 @@ class White(Evil):
 
 # Neutral Roles
 
-class Neutral(Role):
+class Neutral(role.Role):
     pass
 
 class Universal(Neutral):

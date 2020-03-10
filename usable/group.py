@@ -1,19 +1,14 @@
 import discord
 import json
 
+from data import datamanager
+
 class Group:
 
     def __init__(self, client, name = 'text_channel'):
         self.client = client
         self.members = []
-        with open('config.json') as configfile:
-            data = json.load(configfile)
-            if 'covert_server' in data:
-                guild_id = data['covert_server']
-            else:
-                print('Incorrect covert server supplied. Did you forget to edit token.txt?')
-                guild_id = 685944277603188743 # Default
-        self.guild = client.get_guild(guild_id) # insert guild ID
+        self.guild = client.get_guild(datamanager.getConfig('covert_server')) # insert guild ID
         self.name = name
         self.channel = None
 

@@ -1,9 +1,10 @@
 import json
 import discord
 #from game import roles
-from game.role import role
+#from game.role import role
 # Check for correct json
-def checkJson():
+def check_json():
+    print("no")
     try:
         with open('config.json') as configfile:
             data = json.load(configfile)

@@ -1,17 +1,18 @@
-from enum import Enum
-from game.roles import *
+import enum
 import random
 
-class Preset(Enum):
-    CLASSIC = [Seer, Guardian_Angel, Werewolf, Villager, Cupid, Werewolf, Hunter, Alchemist, Werewolf, Mayor, Apprentice_Seer, Werewolf, Knight, Hunter, Werewolf, Ressurectionist]
-    CHAOS = [Seer, Werewolf, Priest, Cultist, Ressurectionist, Bombshell, Teenage_Werewolf, Alpha, Alchemist, Universal, Jester, Executioner]
+from game import roles
+
+class Preset(enum.Enum):
+    CLASSIC = [roles.Seer, roles.Guardian_Angel, roles.Werewolf, roles.Villager, roles.Cupid, roles.Werewolf, roles.Hunter, roles.Alchemist, roles.Werewolf, roles.Mayor, roles.Apprentice_Seer, roles.Werewolf, roles.Knight, roles.Hunter, roles.Werewolf, roles.Ressurectionist]
+    CHAOS = [roles.Seer, roles.Werewolf, roles.Priest, roles.Cultist, roles.Ressurectionist, roles.Bombshell, roles.Teenage_Werewolf, roles.Alpha, roles.Alchemist, roles.Universal, roles.Jester, roles.Executioner]
     RANDOM = []
 
     def get_preset(str, count):
         if str == "RANDOM": #Game with random roles
             preset = list(map(lambda x:random.choice(list(all_roles)),range(count - 2)))
-            preset.append(random.choice(list(good_roles)))
-            preset.append(random.choice(list(evil_roles)))
+            preset.append(random.choice(list(roles.good_roles)))
+            preset.append(random.choice(list(roles.evil_roles)))
             return preset
 
         for preset in Preset:

@@ -1,5 +1,5 @@
 
-from game.roles import *
+#from game.roles import *
 class Player:
 
     def __init__(self, id, role, name = "No Name"):
