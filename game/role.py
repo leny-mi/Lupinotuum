@@ -1,11 +1,17 @@
 from .flags import Flags
+from game.game import Game
 import asyncio
+
 class Role:
 
     def __init__(self, player):
         self.player = player
-        self.flags = {}
-        self.lovers = {}
+        self.flags = set()
+        self.lovers = set()
+
+    async def on_message(self, game, message):
+        print(self.player.name + ": " + message)
+        pass
 
     async def on_gamestart(self, game):
         pass
@@ -14,6 +20,12 @@ class Role:
         pass
 
     async def on_sunrise(self, game):
+        pass
+
+    async def on_votestart(self, game):
+        pass
+
+    async def on_defense(self, game, player_id):
         pass
 
     async def on_guard(self, game):
@@ -28,7 +40,6 @@ class Role:
         ## TODO: you are on trial
         if Flags.GRACED in self.flags:
             pass
-
         #DO DEATH
 
     async def on_hang(self, game):

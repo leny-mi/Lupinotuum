@@ -134,3 +134,4 @@ evil_roles    = {Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Kil
 neutral_roles = {Survivor, Executioner, Protector, Jester, Universal, Copycat, Actor}
 
 all_roles = good_roles.union(evil_roles).union(neutral_roles)
+role_order = [Witch, Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight, Vigilante, Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord, Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, White, Survivor, Executioner, Protector, Jester, Universal, Copycat, Actor]
