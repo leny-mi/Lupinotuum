@@ -3,6 +3,7 @@ from usable.time_difference import Time
 from threading import Timer
 from datetime import timedelta, datetime
 from game.role.player import Player
+from usable import utils
 import asyncio
 import random
 
@@ -19,6 +20,7 @@ class Game:
         self.character_list = character_list
         self.time = Time(timezone)
         self.player_objs = []
+        self.group_chatts = []
 
         self.debug = 0 ## TODO: REMOVE LATER
 
@@ -62,19 +64,36 @@ class Game:
     async def time_scheduler(self):
         if self.time.seconds_until(19, 0) < 3600:
             ## TODO: Announce game start in 1h
-            await self.interface.game_broadcast(self.id, "Game will start at " + self.time.get_reverse_time(datetime.now()+timedelta(hour = 1)).strftime("%b %d %Y %H:%M:%S"))
+            await self.interface.game_broadcast(self.id, "Game will start at " + self.time.get_time_in_string(1,0))
             await asyncio.sleep(3600)
         else:
-            ## TODO: EDIT FOR NEXXT DAY
-            await self.interface.game_broadcast(self.id, "Game will start at " + datetime.now().replace(hour = 19, minute = 0, second = 0, microsecond = 0).strftime("%b %d %Y %H:%M:%S"))
-
+            await self.interface.game_broadcast(self.id, "Game will start at " + self.time.get_next_time_string(19,0))
             await self.sleep_until(19, 0)
 
         ## TODO: CHECK IF ALL PLAYERS JOINED
 
-        await self.commence_inital()
+        if not utils.check_all_players_joined(self.players_list):
+            with open('../config.json') as configfile:
+                data = json.load(configfile)
+            await message.channel.send('Not all players have joined. Please join https://discord.gg/'+ data['invite_link'] +' for private communications\nGame with ID '+str(message.channel.id)+' will start at ' + self.time.get_next_time_string(20,0))
 
-        await self.sleep_until(20, 0)
+            await self.sleep_until(20,0)
+            ## TODO: If game setups at 18:59, this won't be enough time for another join
+
+            if not utils.check_all_players_joined(self.players_list):
+                await self.interface.game_broadcast(self.id, "Not all players have joined. Your game has been cancelled. Use `$setup` to start a new game")
+
+
+            await self.commence_inital()
+            await self.sleep_until(20,15)
+
+        else:
+
+
+            await self.commence_inital()
+            await self.sleep_until(20, 0)
+
+
         await self.commence_night()
 
         while True: #Edit to end at game end

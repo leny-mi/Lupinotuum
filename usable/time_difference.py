@@ -17,3 +17,15 @@ class Time:
     def seconds_until(self, hour, minute):
         now = timezone("UTC").localize(datetime.utcnow())
         return (self.get_time(datetime(year = now.year, month = now.month, day = now.day, hour = hour, minute = minute)) - now).seconds
+
+    def get_next_time_string(self, hour, minute):
+        current = timezone("UTC").localize(datetime.utcnow()).astimezone(self.tz)
+        next    = current.replace(hour = hour, minute = minute, second = 0, microsecond = 0)
+
+        if (next < current):
+            next = next.replace(day = next.day + 1)
+
+        return next.strftime("%b %d %Y %H:%M:%S %Z")
+
+    def get_time_in_string(self, hour, minute):
+        return self.time.get_reverse_time(datetime.utcnow()+timedelta(hour = hour, minute = minute)).strftime("%b %d %Y %H:%M:%S %Z")
