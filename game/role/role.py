@@ -28,7 +28,8 @@ class Role:
         ## TODO: you are on trial
         if Flags.GRACED in self.flags:
             pass
-            #DO DEATH
+
+        #DO DEATH
 
     async def on_hang(self, game):
         ## TODO: you have been hanged

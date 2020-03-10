@@ -3,7 +3,7 @@ import discord
 from usable import utils
 from usable.group import Group
 #from game.roles import Roles
-from game.all_roles import *
+from game.roles import *
 from game.presets import Preset
 from game.game import Game
 
@@ -73,7 +73,6 @@ class MyClient(discord.Client):
             self.role_list[message.channel.id] = Preset.get_preset(message.content[8:], self.count_map[message.channel.id] + 1)
             await message.channel.send("Set preset to "+message.content[8:])
 
-
         # Get all presets
         elif (self.state_map[message.channel.id] == 1 and message.content == '$presetlist'):
             tmessage = 'There are the following presets: ```'
@@ -85,10 +84,8 @@ class MyClient(discord.Client):
         elif (self.state_map[message.channel.id] == 1 and message.content[:12]== '$presetinfo '):
             tmessage = 'Preset '+message.content[12:]+' contains: ```'
             for role in Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
-                tmessage += "\n - " + role.name
+                tmessage += "\n - " + role.__name__
             await message.channel.send(tmessage + "```")
-
-
 
         # User writes $reset before completing setup
         elif (self.state_map[message.channel.id] <= 1 and message.content == '$reset'):
@@ -138,10 +135,10 @@ class MyClient(discord.Client):
 
         # User writes $done after adding enough roles
         elif (self.state_map[message.channel.id] == 1 and message.content == '$done' and len(self.role_list[message.channel.id]) > self.count_map[message.channel.id]):
-            if min(map(lambda x:x.value, self.role_list[message.channel.id])) >= 100:
+            if good_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one town alligned role')
                 return
-            if max(map(lambda x:x.value%200, self.role_list[message.channel.id])) < 100:
+            if evil_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one evil alligend role')
                 return
             await message.channel.send('The following roles will be distributed:' + utils.format_role_list(self.role_list[message.channel.id]))
@@ -187,6 +184,7 @@ class MyClient(discord.Client):
             print("start debug berlin...")
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'Europe/Berlin')
             await self.game_map[message.channel.id].time_scheduler();
+
         if message.content == 'new_york':
             print("start debug york...")
             self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
@@ -218,7 +216,7 @@ class MyClient(discord.Client):
 
         elif (message.content[:6] == "$info "):
             print("AM HERE")
-            if message.content[6:] not in all_roles:
+            if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), all_roles)):
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return
             with open('game/descriptions.json') as configfile:
@@ -229,11 +227,11 @@ class MyClient(discord.Client):
                     return
                 stats = data[message.content[6:].upper()]
                 #color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
-                if role.value == -1:
+                if message.content[6:].lower() == 'narrator':
                     color = 10066176
-                elif role.value < 100:
+                elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), good_roles)):
                     color = 52224
-                elif role.value < 200:
+                elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), evil_roles)):
                     color = 16711680
                 else:
                     color = 7829367

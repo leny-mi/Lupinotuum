@@ -1,7 +1,8 @@
-from game.all_roles import *
+from game.roles import *
 from usable.time_difference import Time
 from threading import Timer
 from datetime import timedelta, datetime
+from game.role.player import Player
 import asyncio
 import random
 
@@ -24,25 +25,23 @@ class Game:
     async def commence_inital(self):
         # Choose List subset
         rolechoice = random.sample(self.character_list, len(self.players_list))
-        while len(list(filter(lambda x:x.value < 100, rolechoice))) == 0 or len(list(filter(lambda x:100 <= x.value < 200, rolechoice))) == 0:
+        while good_roles & set(rolechoice) == set() or evil_roles & set(rolechoice) == set():
             print("Incorrect ")
-            print(preset)
+            print(rolechoice)
             rolechoice = random.sample(self.character_list, len(self.players_list))
 
         # Distribute
-        rolechoice = random.shuffle(rolechoice)
-        for role, player_id in rolechoice, player_list:
-            self.player_objs.append(Player(player_id, None))
+        random.shuffle(rolechoice)
+        for role, player_id in zip(rolechoice, self.players_list):
+            self.player_objs.append(Player(player_id, role))
         await self.interface.game_broadcast(self.id, "Initializing game")
 
     async def commence_day(self):
         #TODO Day stuff
-        print(str(self.id) + " // 1")
         await self.interface.game_broadcast(self.id, "Day has started")
 
     async def commence_vote(self):
         #TODO Vote stuff
-        print(str(self.id) + " // 2")
         await self.interface.game_broadcast(self.id, "Vote has started")
 
     async def commence_defense(self):

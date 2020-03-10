@@ -1,6 +1,6 @@
 from enum import Enum
 #from game.roles import Roles
-from game.all_roles import *
+from game.roles import *
 import random
 
 class Preset(Enum):
