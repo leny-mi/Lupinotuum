@@ -255,6 +255,7 @@ class MyClient(discord.Client):
 
     # End the game
     def end_game(id):
+        self.game_broadcast(id, "The game has ended. Use `$setup` to start another game")
         self.state_map.pop(id)
 
 
