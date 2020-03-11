@@ -4,13 +4,28 @@ from game.flags import Flags
 
 class Role:
 
+
+
     def __init__(self, player):
-        self.player = player
-        self.flags = set()
-        self.lovers = set()
+        self.player = player # Reference to this player
+        self.flags = set() # Set of this roles flags
+        self.lovers = set() # Set of this roles lovers
+
+        self.vote_for = None # Player INDEX to vote for
 
     async def on_message(self, game, message):
         print(self.player.name, ": ", message)
+
+        if message == 'players':
+            print("Debug: List Players")
+            await game.interface.game_direct(self.player.id, "The following players are still in the game:\n" + game.get_player_list())
+
+
+        if message.startswith('vote ') and Flags.VOTE_READY in self.flags:
+            try:
+                self.vote_for = int(message.split(' ')[1])
+            except ValueError:
+                await game.interface.game_direct(self.player.id, "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
         pass
 
     async def on_gamestart(self, game):
@@ -23,13 +38,60 @@ class Role:
         pass
 
     async def on_votestart(self, game):
-        pass
+        self.flags.add(Flags.VOTE_READY)
 
     async def on_voteend(self, game):
+        self.flags.remove(Flags.VOTE_READY)
+        if self.vote_for is not None:
+            game.add_vote(game.get_player_id_at(self.vote_for), 1)
+            self.vote_for = None
+
+    async def on_defense(self, game, tied_players):
+        if self.player in tied_players:
+            await game.interface.game_direct(self.player.id, "You are on trial. You may defend yourself to escape death.")
+
+    async def on_deathrow(self, game, player):
+        ## TODO: you are on trial
+        if self.player == player:
+            #await game.interface.game_broadcast(game.id, player.name + " is on death row.")
+            pass
+        #DO DEATH
+
+    async def on_hang(self, game, player):
+        ## TODO: you have been hanged
+        if self.player == player:
+            if Flags.GRACED in self.flags:
+                await game.interface.game_broadcast(game.id, self.player.name + " has been graced.")
+            else:
+                await game.interface.game_broadcast(game.id, self.player.name + " has been hanged. They have been a " + self.player.role.__class__.__name__.title())
+                self.player.alive = False
+                await game.player_die(self.player, None)
+            pass
+
+    async def on_playerdeath(self, game, player, muderer):
+        #game.players_alive.remove(player)
+        if player in self.lovers:
+            await game.interface.game_broadcast(game.id, self.player.name + " died because of their love to " + player.name)
+
+            await game.player_die(self.player, None)
+
+    async def on_ressurect(self, game):
+        pass ## TODO:
+
+    async def on_changerole(self, game, role):
+        player.role = role(self.player)
+        await game.interface.game_direct(self.player.id, "Your role has been changed to " + player.role.__class__.__name__.title())
+
+
+    async def on_inhibit(self, game):
         pass
 
-    async def on_defense(self, game, player_id):
-        pass
+    async def on_inlove(self, game, player):
+        self.lovers.add(player)
+
+    async def on_attacked(self, game, attacker_role):
+        await game.interface.game_broadcast(game.id, self.player.name + " has died because of an attack by a "+attacker.__class__.__name__.title())
+
 
     async def on_guard(self, game):
         ## TODO: you have been guarded
@@ -38,28 +100,3 @@ class Role:
     async def on_grace(self, game):
         ## TODO: you have been graced
         self.flags.add(Flags.GRACED)
-
-    async def on_trial(self, game):
-        ## TODO: you are on trial
-        if Flags.GRACED in self.flags:
-            pass
-        #DO DEATH
-
-    async def on_hang(self, game):
-        ## TODO: you have been hanged
-        pass
-
-    async def on_playerdeath(self, game, player, muderer_class):
-        game.players_alive.remove(player)
-
-    async def on_ressurect(self, game):
-        pass
-
-    async def on_changerole(self, game, role):
-        player.role = role
-
-    async def on_inhibit(self, game):
-        pass
-
-    async def on_inlove(self, game, player):
-        self.lovers.add(player)

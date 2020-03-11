@@ -290,8 +290,10 @@ class MyClient(discord.Client):
             if message.author.id not in self.in_game_map or len(self.in_game_map[message.author.id]) == 0:
                 await message.channel.send("You don't have any games.")
             else:
-                await message.channel.send('Your games are (ID | Server | Channel): \n - ' + "\n - ".join(map(lambda x: str(x)  + " | "+ self.get_channel(x).guild.name + " | " + self.get_channel(x).name ,self.in_game_map[message.author.id])))
+                await message.channel.send('Your games are (ID | Server | Channel): \n - ' + "\n - ".join(map(lambda x: str(x)  + " ("+ self.get_channel(x).guild.name + "/" + self.get_channel(x).name + ")" ,self.in_game_map[message.author.id])))
             return
+
+
 
         return False
 
@@ -330,7 +332,7 @@ class MyClient(discord.Client):
 
     # Send a message to a user
     async def game_direct(self, user_id, message):
-        await self.get_user(user_id).dm_channel.send()
+        await self.get_user(user_id).dm_channel.send(message)
 
     # End the game
     def end_game(id):

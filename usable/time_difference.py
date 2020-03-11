@@ -27,4 +27,4 @@ class Time:
         return next.strftime("%b %d %Y %H:%M:%S %Z")
 
     def get_time_in_string(self, hour, minute):
-        return self.time.get_reverse_time(datetime.utcnow()+timedelta(hour = hour, minute = minute)).strftime("%b %d %Y %H:%M:%S %Z")
+        return self.get_reverse_time(datetime.utcnow()+timedelta(hours = hour, minutes = minute)).strftime("%b %d %Y %H:%M:%S %Z")
