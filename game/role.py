@@ -10,7 +10,7 @@ class Role:
         self.lovers = set()
 
     async def on_message(self, game, message):
-        print(self.player.name + ": " + message)
+        print(self.player.name, ": ", message.content)
         pass
 
     async def on_gamestart(self, game):

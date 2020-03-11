@@ -17,27 +17,34 @@ class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged on as', self.user)
         await client.change_presence(activity=discord.Game(name='Write $setup to start a game'))
-        self.state_map = {} #Map channel to state
-        self.react_map = {} #Map channel to react message
-        self.role_list = {} #Map channel to role list
-        self.count_map = {} #Map channel to count
-        self.game_map  = {} #Map channel to game
-        self.sched_map = {} #Map channel to scheduler (PROBALBY NOT NEEDED AFTER DEBUG)
-        self.player_map= {} #Map channel to player list
-        self.time_map  = {} #Map channel to time object
+        self.state_map  = {} #Map channel to state
+        self.react_map  = {} #Map channel to react message
+        self.role_list  = {} #Map channel to role list
+        self.count_map  = {} #Map channel to count
+        self.game_map   = {} #Map channel to game
+        self.sched_map  = {} #Map channel to scheduler (PROBALBY NOT NEEDED AFTER DEBUG)
+        self.player_map = {} #Map channel to player list
+        self.time_map   = {} #Map channel to time object
+        self.in_game_map= {} #Map playerid to their gameids
 
     async def on_message(self, message):
         # Don't react to bots
         if message.author.bot:
             return
 
-        # Game setup
+
+        # Setup game
         if message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3:
             await self.setup(message)
+        elif (message.content == "$setup"): # Send a message only on $setup to avoid confusion
+            await message.channel.send('Game is already running. There can only be ohne game per text channel.')
+            return
+        else: # Route Message to role (io -> game -> player -> role -> on_message)
+            await self.game_map[message.channel.id].player_objs[message.author.id].role.on_message(message)
+
 
         # User writes $setup while a game in runnning
-        elif (message.content == "$setup"):
-            await message.channel.send('Game is already running. There can only be ohne game per text channel.')
+
 
         # User uses "info"
         await self.information_calls(message)
@@ -73,6 +80,7 @@ class MyClient(discord.Client):
             self.count_map[message.channel.id] = count
             self.player_map[message.channel.id] = set(map(lambda x: x.id,await list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].users().flatten()))
             self.player_map[message.channel.id].remove(self.user.id)
+
             print("Debug: The following players are participating:", self.player_map[message.channel.id]) #DEBUG
             await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
 
@@ -148,6 +156,13 @@ class MyClient(discord.Client):
             if roles.evil_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one evil alligend role')
                 return
+
+            for player_id in self.player_map[message.channel.id]:
+                if player_id not in self.in_game_map:
+                    self.in_game_map[player_id] = set()
+                self.in_game_map[player_id].add(message.channel.id)
+
+
             await message.channel.send('The following roles will be distributed:' + utils.format_role_list(self.role_list[message.channel.id]))
             #with open('config.json') as configfile:
             #    data = json.load(configfile)
@@ -177,6 +192,8 @@ class MyClient(discord.Client):
             await self.sched_map[message.channel.id].initialize()
 
             await message.channel.send('The game has ended. Thank you for playing :)')
+            for player_id in self.game_map[message.channel.id].player_list:
+                self.in_game_map[player_id].pop(message.channel.id)
             self.state_map.pop(message.channel.id)
 
 
@@ -238,6 +255,7 @@ class MyClient(discord.Client):
 
             await message.channel.send(tmessage + "```")
 
+
         elif (message.content[:6] == "$info "):
             print("Debug: Get info on", message.content[6:].title())
             if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)):
@@ -266,6 +284,15 @@ class MyClient(discord.Client):
             embed.add_field(name = 'Usage', value = stats['usage'], inline = False)
             await message.channel.send("", embed = embed)
 
+        elif (message.content == '$games'):
+            print("Debug: Get games", message.content[6:].title())
+            if message.author.id not in self.in_game_map or len(self.in_game_map[message.author.id]) == 0:
+                await message.channel.send("You don't have any games.")
+            else:
+                await message.channel.send('Your games are (ID | Server | Channel): \n - ' + "\n - ".join(map(lambda x: str(x)  + " | "+ self.get_channel(x).guild.name + " | " + self.get_channel(x).name ,self.in_game_map[message.author.id])))
+
+    async def parse_player_message(self, message):
+        pass
 
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
