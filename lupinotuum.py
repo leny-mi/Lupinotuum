@@ -267,7 +267,6 @@ class MyClient(discord.Client):
             await message.channel.send("", embed = embed)
 
 
-
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
         await self.get_channel(game_id).send(message)
