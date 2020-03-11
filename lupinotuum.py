@@ -31,9 +31,6 @@ class MyClient(discord.Client):
         if message.author.bot:
             return
 
-        if message.channel.id in self.state_map:
-            print(message.content[:10] + "" + str(self.state_map[message.channel.id]))
-
         # Game setup
         if message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3:
             await self.setup(message)
@@ -57,14 +54,14 @@ class MyClient(discord.Client):
         if not message.channel.id in self.state_map:
             if message.content == "$setup":
                 #TODO SETUP
-                print("Setting up")
+                print("Debug: Setup initialized")
                 self.state_map[message.channel.id] = 0
                 self.react_map[message.channel.id] = await message.channel.send('Setting up game. To reset, write `$reset`. If you want to participate, react with :wolf: under this message. After all players have reacted, write `$continue`')
                 await self.react_map[message.channel.id].add_reaction('🐺')
 
         # User writes continue after reacting
         elif (self.state_map[message.channel.id] == 0 and message.content == '$continue'):
-            print("Continue")
+            print("Debug: Continue has been called")
             self.state_map[message.channel.id] = 1
             message = await message.channel.fetch_message(self.react_map[message.channel.id].id)
             count = list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].count - 1
@@ -75,8 +72,8 @@ class MyClient(discord.Client):
                 return
             self.count_map[message.channel.id] = count
             self.player_map[message.channel.id] = set(map(lambda x: x.id,await list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].users().flatten()))
-            self.player_map[message.channel.id].remove(685910279070285877)
-            print(self.player_map[message.channel.id]) #DEBUG
+            self.player_map[message.channel.id].remove(self.user.id)
+            print("Debug: The following players are participating:", self.player_map[message.channel.id]) #DEBUG
             await message.channel.send(str(count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
 
         # Set a preset
@@ -167,17 +164,16 @@ class MyClient(discord.Client):
 
 
         elif (self.state_map[message.channel.id] == 2 and message.content[:10] == '$timezone '):
-            print("Entered Timezone")
+            print("Debug: Entered Timezone", message.content[:10])
             #try:
             self.time_map[message.channel.id] = time_difference.Time(message.content[10:])
 
-            print(2)
             self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], self.time_map[message.channel.id])
-            print(2.5)
+
             self.sched_map[message.channel.id] = scheduler.Scheduler(self, self.time_map[message.channel.id], self.game_map[message.channel.id])
-            print(3)
+
             self.state_map[message.channel.id] = 3
-            print(4)
+
             await self.sched_map[message.channel.id].initialize()
 
             await message.channel.send('The game has ended. Thank you for playing :)')
@@ -193,66 +189,57 @@ class MyClient(discord.Client):
     async def debugCommands(self, message):
 
         if message.content == 'create':
-            print("Create")
+            print("Debug: Create secret channel")
             self.c = group.Group(self, 'test_hi1')
             await self.c.instantiate_channel()
 
         if message.content == 'ref':
-            print("refresh")
+            print("Debug: Refresh secret channel")
             await self.c.refresh_members()
 
         if message.content == 'add':
-            print("add")
+            print("Debug: Add player to secret channel")
             self.c.add_user(298488132255350784)
 
         if message.content == 'remove':
-            print("remove")
+            print("Debug: Remove player from secret channel")
             self.c.remove_user(298488132255350784)
 
         if message.content == 'del':
-            print("deleting")
+            print("Debug: Delete secret channel")
             await self.c.delete_channel()
 
         if message.content == '.next':
-            print("Next")
+            print("Debug: Skip to next event")
             self.sched_map[message.channel.id].debug = 1
 
         if message.content == 'berlin':
-            print("start debug berlin...")
+            print("Debug: Start a game in Berlin")
             self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'Europe/Berlin')
             await self.game_map[message.channel.id].time_scheduler();
 
         if message.content == 'new_york':
-            print("start debug york...")
+            print("Debug: Start a game in New York")
             self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'America/New_York')
             await self.game_map[message.channel.id].time_scheduler();
-
-        if message.content == 'onservermou':
-            await message.channel.send("Result: "+ str(utils.check_all_players_joined(self, [298488132255350784])))
-
-        if message.content == 'onservernon':
-            await message.channel.send("Result: "+ str(utils.check_all_players_joined(self, [270240574748098561])))
 
     # Get information about roles or presets
     async def information_calls(self, message):
         # User writes $list and gets a display of all roles
         if (message.content == '$rolelist'):
-            print("List")
+            print("Debug: List all roles")
             tmessage = 'The following roles exist'
-            tmessage += "\nTown alligned roles:```"
-            for role in roles.good_roles:
-                tmessage += ("\n - " + role.__name__)
-            tmessage += "```Evil alligned roles: ```"
-            for role in roles.evil_roles:
-                tmessage += ("\n - " + role.__name__)
-            tmessage += "```Neutral alligned roles: ```"
-            for role in roles.neutral_roles:
-                tmessage += ("\n - " + role.__name__)
+            tmessage += "\n\nTown alligned roles:```"
+            tmessage += "\n - ".join(map(lambda x: x.__name__, roles.good_roles))
+            tmessage += "```\nEvil alligned roles: ```"
+            tmessage += "\n - ".join(map(lambda x: x.__name__, roles.evil_roles))
+            tmessage += "```\nNeutral alligned roles: ```"
+            tmessage += "\n - ".join(map(lambda x: x.__name__, roles.neutral_roles))
 
             await message.channel.send(tmessage + "```")
 
         elif (message.content[:6] == "$info "):
-            print("AM HERE")
+            print("Debug: Get info on", message.content[6:].title())
             if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)):
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return
@@ -296,7 +283,7 @@ class MyClient(discord.Client):
 
 
 if not datamanager.check_json():
-    print("Multiple errors have occured. Bot has not been started")
+    print("Error: Multiple errors have occured. Bot has not been started")
     quit()
 
 client = MyClient(activity = discord.Activity(name = 'Write $setup to start a game' , type = discord.ActivityType.custom))

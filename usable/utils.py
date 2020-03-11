@@ -6,8 +6,7 @@ from data import datamanager
 #from game.role import role
 # Check for correct json
 def check_json():
-    print("THIS HSOULÖD NOT HAPPEN")
-    print("no")
+    print("Debug: This should not happen. utils.py has been called where it shouldn't.")
     try:
         with open('config.json') as configfile:
             data = json.load(configfile)

@@ -27,6 +27,7 @@ class Game:
 
 
     async def commence_inital(self):
+        print("Debug: initilize on game")
         # Choose List subset
         rolechoice = random.sample(self.character_list, len(self.players_list))
         while roles.good_roles & set(rolechoice) == set() or roles.evil_roles & set(rolechoice) == set():
@@ -44,6 +45,7 @@ class Game:
 
     async def commence_day(self):
         #TODO Day stuff
+        print("Debug: Day has started")
 
         await self.interface.game_broadcast(self.id, "Day has started")
         self.tie = False
@@ -53,6 +55,7 @@ class Game:
 
     async def commence_vote(self):
         #TODO Vote stuff
+        print("Debug: Vote has started")
         self.votes = {}
         await self.interface.game_broadcast(self.id, "Vote has started")
         for player in self.sort_players(only_alive = True):
@@ -60,28 +63,29 @@ class Game:
 
     async def commence_voteend(self):
         #TODO Defense stuff
-
+        print("Debug: Vote has ended")
         await self.interface.game_broadcast(self.id, "Vote has ended")
         for player in self.sort_players(only_alive = True):
             player.role.on_voteend(self)
 
-        max_votes = max(self.votes.values())
-        most_voted = list(filter(lambda x: self.votes[x] == max_votes, self.sort_players(only_alive = True)))
+
+        max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
+        most_voted = list(filter(lambda x: self.votes[x.id] == max_votes, self.sort_players(only_alive = True)))
 
         if len(most_voted) > 1:
-            await self.interface.game_broadcast(self.id, "There has been a tie between" + ", ".join(list(map(lambda x: self.player_objs[x].name, most_voted))) + "\nVote again on either of them by "+self.time.get_next_time_string(19,0))
+            await self.interface.game_broadcast(self.id, "There has been a tie between" + ", ".join(list(map(lambda x: x.name, most_voted))) + "\nVote again on either of them by "+self.time.get_next_time_string(19,0))
             for player in self.sort_players(only_alive = True):
                 player.role.on_votestart(self)
             self.tie = True
 
         else:
             # TODO: PRINT ALL VOTES
-            await self.interface.game_broadcast(self.id, self.player_objs[most_voted[0]].name + " will die today. The hanging will be at " +  self.time.get_next_time_string(19,30))
-            to_die = most_voted[0]
+            await self.interface.game_broadcast(self.id, most_voted[0].name + " will die today. The hanging will be at " +  self.time.get_next_time_string(19,30))
+            self.to_die = most_voted[0]
 
     async def commence_tiebreaker(self):
         #TODO Tiebreaker stuff
-        print("Tiebreaker start")
+        print("Debug: Tiebreaker has started")
         if not self.tie:
             return
 
@@ -92,26 +96,28 @@ class Game:
         for player in self.sort_players(only = True):
             player.role.on_voteend()
 
-        max_votes = max(self.votes.values())
-        most_voted = list(filter(lambda x: self.votes[x] == max_votes, self.sort_players(only_alive = True)))
+        max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
+        most_voted = list(filter(lambda x: self.votes[x.id] == max_votes, self.sort_players(only_alive = True)))
 
         if len(most_voted) > 1:
-            await self.interface.game_broadcast(self.id, "There has been a tie between" + ", ".join(list(map(lambda x: self.player_objs[x].name, most_voted))) + "\nNo one will die today...")
+            await self.interface.game_broadcast(self.id, "There has been a tie between" + ", ".join(list(map(lambda x: x.name, most_voted))) + "\nNo one will die today...")
             return
 
         else:
             # TODO: PRINT ALL VOTES
-            await self.interface.game_broadcast(self.id, self.player_objs[most_voted[0]].name + " will die today. The hanging will be at " +  self.time.get_next_time_string(19,30))
-            to_die = most_voted[0]
+            await self.interface.game_broadcast(self.id, most_voted[0].name + " will die today. The hanging will be at " +  self.time.get_next_time_string(19,30))
+            self.to_die = most_voted[0]
 
     async def commence_hanging(self):
-        print("Hanging start")
-
-        pass
+        print("Debug: Hanging has started")
+        if self.to_die is None:
+            return
+        await self.interface.game_broadcast(self.id, self.to_die.name + " has been hanged.")
+        self.to_die.alive = False
 
     async def commence_night(self):
         #TODO Night stuff
-
+        print("Debug: Night has started")
         await self.interface.game_broadcast(self.id, "Night has started")
 
     def sort_players(self, only_alive = False):

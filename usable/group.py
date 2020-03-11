@@ -30,10 +30,10 @@ class Group:
 
     async def refresh_members(self):
         for user in self.channel.members:
-            print("remove" + user.name)
+            print("Debug: Removed " + user.name + " from secret channel")
             await self.channel.set_permissions(user, overwrite = None)
         for user in self.members:
-            print ("add" + user.name)
+            print ("Debug: Added " + user.name + " to secret channel")
             await self.channel.set_permissions(user, read_messages = True, send_messages = True)
 
     async def delete_channel(self):

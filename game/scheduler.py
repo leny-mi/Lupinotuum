@@ -67,7 +67,7 @@ class Scheduler:
 
     async def sleep_until(self, hour, minute):
         secs = self.time.seconds_until(hour, minute)
-        print("Seconds to next event "+str(secs))
+        print("Debug: Seconds to next event "+str(secs))
         while self.debug == 0:      # DEBUG:
             await asyncio.sleep(1)  # DEBUG:
         self.debug = 0              # DEBUG:
