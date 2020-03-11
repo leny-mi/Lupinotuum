@@ -1,9 +1,12 @@
 import json
 import discord
+
+from data import datamanager
 #from game import roles
 #from game.role import role
 # Check for correct json
 def check_json():
+    print("THIS HSOULÖD NOT HAPPEN")
     print("no")
     try:
         with open('config.json') as configfile:
@@ -24,8 +27,6 @@ def format_role_list(roles):
     return "\n - " + ("\n - ".join(map(lambda x: str(roles.count(x)) + 'x ' + x.__name__, list(set(roles)))))
 
 def check_all_players_joined(client, player_list):
-    with open('config.json') as configfile:
-        data = json.load(configfile)
-        s = set(map(lambda x: x.id, client.get_guild(data['covert_server']).members))
-        print(s)
-        return set(player_list).issubset(s)
+    s = set(map(lambda x: x.id, client.get_guild(datamanager.get_config('covert_server')).members))
+    #rint(s)
+    return set(player_list).issubset(s)

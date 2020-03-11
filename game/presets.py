@@ -10,7 +10,7 @@ class Preset(enum.Enum):
 
     def get_preset(str, count):
         if str == "RANDOM": #Game with random roles
-            preset = list(map(lambda x:random.choice(list(all_roles)),range(count - 2)))
+            preset = list(map(lambda x:random.choice(list(roles.all_roles)),range(count - 2)))
             preset.append(random.choice(list(roles.good_roles)))
             preset.append(random.choice(list(roles.evil_roles)))
             return preset

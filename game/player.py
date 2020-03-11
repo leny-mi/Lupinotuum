@@ -1,9 +1,10 @@
 
 #from game.roles import *
+
 class Player:
 
     def __init__(self, id, role, name = "No Name"):
-        self.role = Role(self)
+        self.role = role(self)
         self.alive = True
         self.id = id
         self.name = name

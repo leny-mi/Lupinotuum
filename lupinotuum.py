@@ -1,17 +1,17 @@
 
 import discord
 
+from data import datamanager
+
+from usable import group
+from usable import time_difference
 from usable import utils
 
-from usable.group import Group
-#from game.roles import Roles
-#from game.roles import *
 from game import roles
+from game import scheduler
+from game import presets
+from game import game
 
-from game.presets import Preset
-from game.game import Game
-
-from data import datamanager
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -22,15 +22,20 @@ class MyClient(discord.Client):
         self.role_list = {} #Map channel to role list
         self.count_map = {} #Map channel to count
         self.game_map  = {} #Map channel to game
+        self.sched_map = {} #Map channel to scheduler (PROBALBY NOT NEEDED AFTER DEBUG)
         self.player_map= {} #Map channel to player list
+        self.time_map  = {} #Map channel to time object
 
     async def on_message(self, message):
         # Don't react to bots
         if message.author.bot:
             return
 
+        if message.channel.id in self.state_map:
+            print(message.content[:10] + "" + str(self.state_map[message.channel.id]))
+
         # Game setup
-        if message.channel.id not in self.state_map or self.state_map[message.channel.id] < 2:
+        if message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3:
             await self.setup(message)
 
         # User writes $setup while a game in runnning
@@ -76,20 +81,20 @@ class MyClient(discord.Client):
 
         # Set a preset
         elif (self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset '):
-            self.role_list[message.channel.id] = Preset.get_preset(message.content[8:], self.count_map[message.channel.id] + 1)
+            self.role_list[message.channel.id] = presets.Preset.get_preset(message.content[8:], self.count_map[message.channel.id] + 1)
             await message.channel.send("Set preset to "+message.content[8:])
 
         # Get all presets
         elif (self.state_map[message.channel.id] == 1 and message.content == '$presetlist'):
             tmessage = 'There are the following presets: ```'
-            for preset in Preset:
+            for preset in presets.Preset:
                 tmessage += "\n - " + preset.name
             await message.channel.send(tmessage + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
 
         # Get a certain preset
         elif (self.state_map[message.channel.id] == 1 and message.content[:12]== '$presetinfo '):
             tmessage = 'Preset '+message.content[12:]+' contains: ```'
-            for role in Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
+            for role in presets.Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
                 tmessage += "\n - " + role.__name__
             await message.channel.send(tmessage + "```")
 
@@ -138,7 +143,6 @@ class MyClient(discord.Client):
         elif (self.state_map[message.channel.id] == 1 and message.content == '$done' and (message.channel.id not in self.role_list or len(self.role_list[message.channel.id]) <= self.count_map[message.channel.id])):
             await message.channel.send('There are not enough roles. There should be at least '+str(self.count_map[message.channel.id] + 1)+' roles.')
 
-
         # User writes $done after adding enough roles
         elif (self.state_map[message.channel.id] == 1 and message.content == '$done' and len(self.role_list[message.channel.id]) > self.count_map[message.channel.id]):
             if roles.good_roles & set(self.role_list[message.channel.id]) == set():
@@ -151,19 +155,46 @@ class MyClient(discord.Client):
             #with open('config.json') as configfile:
             #    data = json.load(configfile)
             await message.channel.send('Please join https://discord.gg/'+ datamanager.get_config('invite_link') +' for private communications\nGame with ID '+str(message.channel.id)+' will start at INSERT TIME on INSERT DATE')
+            await message.channel.send('Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
+
             self.state_map[message.channel.id] = 2
+
 
             #TODO INITIALIZE GAME HERE
             ## TODO: ENTER TIME ZONE
-            self.game_map[message.channel.id] = Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
-            await self.game_map[message.channel.id].time_scheduler();
+            #self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
+            #await self.game_map[message.channel.id].time_scheduler();
+
+
+        elif (self.state_map[message.channel.id] == 2 and message.content[:10] == '$timezone '):
+            print("Entered Timezone")
+            #try:
+            self.time_map[message.channel.id] = time_difference.Time(message.content[10:])
+
+            print(2)
+            self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], self.time_map[message.channel.id])
+            print(2.5)
+            self.sched_map[message.channel.id] = scheduler.Scheduler(self, self.time_map[message.channel.id], self.game_map[message.channel.id])
+            print(3)
+            self.state_map[message.channel.id] = 3
+            print(4)
+            await self.sched_map[message.channel.id].initialize()
+
+            await message.channel.send('The game has ended. Thank you for playing :)')
+            self.state_map.pop(message.channel.id)
+
+
+            #except:
+            #    await message.channel.send('Unknown timezone. Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
+
+
 
     # Debug stuff
     async def debugCommands(self, message):
 
         if message.content == 'create':
             print("Create")
-            self.c = Group(self, 'test_hi1')
+            self.c = group.Group(self, 'test_hi1')
             await self.c.instantiate_channel()
 
         if message.content == 'ref':
@@ -184,16 +215,16 @@ class MyClient(discord.Client):
 
         if message.content == '.next':
             print("Next")
-            self.game_map[message.channel.id].debug = 1
+            self.sched_map[message.channel.id].debug = 1
 
         if message.content == 'berlin':
             print("start debug berlin...")
-            self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'Europe/Berlin')
+            self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'Europe/Berlin')
             await self.game_map[message.channel.id].time_scheduler();
 
         if message.content == 'new_york':
             print("start debug york...")
-            self.game_map[message.channel.id] = Game(self, None, message.channel.id, None, 'America/New_York')
+            self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'America/New_York')
             await self.game_map[message.channel.id].time_scheduler();
 
         if message.content == 'onservermou':

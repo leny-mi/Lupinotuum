@@ -25,6 +25,9 @@ class Role:
     async def on_votestart(self, game):
         pass
 
+    async def on_voteend(self, game):
+        pass
+
     async def on_defense(self, game, player_id):
         pass
 

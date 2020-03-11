@@ -2,6 +2,7 @@ import asyncio
 import random
 
 from game import roles
+from game import player
 #import usable.time_difference.Time
 #from datetime import timedelta, datetime
 #from game import player
@@ -36,10 +37,10 @@ class Game:
         # Distribute
         random.shuffle(rolechoice)
         for role, player_id in zip(rolechoice, self.players_list):
-            self.player_objs[player_id] = (Player(player_id, role))
+            self.player_objs[player_id] = (player.Player(player_id, role))
         await self.interface.game_broadcast(self.id, "Initializing game")
-        for player in self.sort_players():
-            player.role.on_gamestart(self)
+        for cplayer in self.sort_players():
+            await cplayer.role.on_gamestart(self)
 
     async def commence_day(self):
         #TODO Day stuff
@@ -48,14 +49,14 @@ class Game:
         self.tie = False
         self.to_die = None
         for player in self.sort_players(only_alive = True):
-            player.role.on_sunrise(self)
+            await player.role.on_sunrise(self)
 
     async def commence_vote(self):
         #TODO Vote stuff
         self.votes = {}
         await self.interface.game_broadcast(self.id, "Vote has started")
         for player in self.sort_players(only_alive = True):
-            player.role.on_votestart(self)
+            await player.role.on_votestart(self)
 
     async def commence_voteend(self):
         #TODO Defense stuff
@@ -114,9 +115,9 @@ class Game:
         await self.interface.game_broadcast(self.id, "Night has started")
 
     def sort_players(self, only_alive = False):
-        players = player_list.copy()
-        players.sort(key = lambda x: role_order.index(x.role.__class__))
-        return list(filter(lambda x: not only_alive or self.player_objs[x].alive, players))
+        players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
+        players.sort(key = lambda x: roles.role_order.index(x.role.__class__))
+        return list(filter(lambda x: not only_alive or x.alive, players))
 
     def add_vote(self, player_id, vote_count):
         if player_id not in self.votes:
