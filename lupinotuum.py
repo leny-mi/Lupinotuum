@@ -29,25 +29,25 @@ class MyClient(discord.Client):
 
     async def on_message(self, message):
         # Don't react to bots
-        if message.author.bot:
+        if message.author.bot or ('$' not in message.content and '.' not in message.content):
             return
 
+        # User uses "info"
+        if await self.information_calls(message) != False:
+            return
 
         # Setup game
-        if message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3:
+        if message.channel.type == discord.ChannelType.text and (message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3):
             await self.setup(message)
-        elif (message.content == "$setup"): # Send a message only on $setup to avoid confusion
+        elif message.channel.type == discord.ChannelType.text and message.content == "$setup": # Send a message only on $setup to avoid confusion
             await message.channel.send('Game is already running. There can only be ohne game per text channel.')
             return
-        else: # Route Message to role (io -> game -> player -> role -> on_message)
-            await self.game_map[message.channel.id].player_objs[message.author.id].role.on_message(message)
+        #else: # Route Message to role (io -> game -> player -> role -> on_message)
+        if message.channel.type == discord.ChannelType.private:
+            await self.parse_player_message(message)
 
 
         # User writes $setup while a game in runnning
-
-
-        # User uses "info"
-        await self.information_calls(message)
 
         # Debug
         await self.debugCommands(message)
@@ -254,9 +254,9 @@ class MyClient(discord.Client):
             tmessage += "\n - ".join(map(lambda x: x.__name__, roles.neutral_roles))
 
             await message.channel.send(tmessage + "```")
+            return
 
-
-        elif (message.content[:6] == "$info "):
+        if (message.content[:6] == "$info "):
             print("Debug: Get info on", message.content[6:].title())
             if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)):
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
@@ -283,16 +283,46 @@ class MyClient(discord.Client):
             embed.add_field(name = 'Alligment', value = stats['allignment'], inline = True)
             embed.add_field(name = 'Usage', value = stats['usage'], inline = False)
             await message.channel.send("", embed = embed)
+            return
 
-        elif (message.content == '$games'):
+        if (message.content == '$games'):
             print("Debug: Get games", message.content[6:].title())
             if message.author.id not in self.in_game_map or len(self.in_game_map[message.author.id]) == 0:
                 await message.channel.send("You don't have any games.")
             else:
                 await message.channel.send('Your games are (ID | Server | Channel): \n - ' + "\n - ".join(map(lambda x: str(x)  + " | "+ self.get_channel(x).guild.name + " | " + self.get_channel(x).name ,self.in_game_map[message.author.id])))
+            return
 
+        return False
+
+    # Parse direct messages
     async def parse_player_message(self, message):
-        pass
+        print("Debug: Start parsing private message")
+        if message.channel.type != discord.ChannelType.private or '$' not in message.content or message.author.id not in self.in_game_map:
+            return
+
+        print("Debug: Message parsed")
+        if message.content.startswith('$') and len(self.in_game_map[message.author.id]) > 1:
+            await message.channel.send("You are in multiple games. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+            return
+
+        games = list(filter(lambda x:str(x).startswith(message.content.split('$')[0]), self.in_game_map[message.author.id]))
+        if len(games) > 1:
+            await message.channel.send("You are in multiple games. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+            return
+
+        if len(games) < 1:
+            await message.channel.send("Either none of your games match your ID or they have not yet started. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+            return
+
+        if message.author.id not in self.game_map[games[0]].player_objs:
+            await message.channel.send("This game has not yet started.")
+            return
+
+        print("Debug: Relay private message")
+        print("Debug: In Games:",games)
+        print("Debug: Game has players:",self.game_map[games[0]].player_objs.keys())
+        await self.game_map[games[0]].player_objs[message.author.id].role.on_message(self.game_map[games[0]], message.content.split('$')[1])
 
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
