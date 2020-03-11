@@ -60,7 +60,6 @@ Your `config.json` might look like this
 |Priest|Can throw Holy Water at another player. If target is a werewolf the target dies; otherwise the priest dies|-|
 |Brothers|Knows the other Brothers|-|
 |Mason|Knows the other Masons|-|
-|Villager-Villager|Their role as a villager is visible to all players|-|
 |Fox|Once: Choose any three players. If there is at least one werewolf amongst them, keep this ability|-|
 |Teacher|May not vote. Each day, right before the votes: Forbid up to 2(?) players from voting that turn, but which can still debate.|-|
 |Lord|Once: After any vote, the Lord can, upon request by the victim, pardon the victim. No player is eliminated. Can pardon himself|-|

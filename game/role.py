@@ -26,12 +26,14 @@ class Role:
                 self.vote_for = int(message.split(' ')[1])
             except ValueError:
                 await game.interface.game_direct(self.player.id, "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
-        pass
 
     async def on_gamestart(self, game):
         pass
 
     async def on_nightfall(self, game):
+        pass
+
+    async def on_postnight(self, game):
         pass
 
     async def on_sunrise(self, game):
@@ -100,3 +102,18 @@ class Role:
     async def on_grace(self, game):
         ## TODO: you have been graced
         self.flags.add(Flags.GRACED)
+
+    def do_vote_action(self, game, message, flag = Flags.VOTE_READY):
+        if message.startswith('vote ') and flag in self.flags:
+            try:
+                value = int(message.split(' ')[1])
+                if not game.get_player_obj_at(value).alive:
+                    await game.interface.game_direct(self.player.id, "Chosen player is not alive. Please choose a player who is still in the game.")
+                    return
+                self.vote_for = value
+            except ValueError:
+                await game.interface.game_direct(self.player.id, "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
+            except IndexError:
+                await game.interface.game_direct(self.player.id, "Incorrect player index")
+
+    #def do_choose(self, game, message, flag )

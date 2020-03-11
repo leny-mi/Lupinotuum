@@ -1,4 +1,5 @@
 from game import role
+from usable import group
 
 # Good Roles
 
@@ -92,7 +93,20 @@ class Vampire(Evil):
     pass
 
 class Werewolf(Evil):
-    pass
+    async def on_message(self, game, message):
+        super(game, message, self)
+        do_vote_action(game, message, flag = Flags.ABILITY_READY)
+
+    async def on_gamestart(self, game):
+        if Werewolf not in game.channels:
+            game.channels[Werewolf] = game.create_group(Werewolf)
+        game.channels[Werewolf].add_user(self.player.id)
+
+    async def on_nightfall(self, game):
+        self.flags.add(Flags.ABILITY_READY)
+
+    async def on_postnight(self, name):
+        self.flags.remove(Flags.ABILITY_READY)
 
 class Witch(Evil):
     pass

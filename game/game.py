@@ -3,6 +3,8 @@ import random
 
 from game import roles
 from game import player
+
+from usable import group
 #import usable.time_difference.Time
 #from datetime import timedelta, datetime
 #from game import player
@@ -21,7 +23,7 @@ class Game:
         # self.players_alive = player_list.copy() # Maybe not needed
         self.player_objs = {} # Map IDs to Objects
         self.votes       = {} # Map IDs to Votes
-        self.channels    = {} # Created channels
+        self.channels    = {} # Map role to channels
 
         self.day_n = 1
         self.tie = 0
@@ -141,6 +143,11 @@ class Game:
         for player in self.sort_players(only_alive = True):
             await player.role.on_playerdeath(self, player, murderer)
 
+    async def create_group(self, role):
+        g = group.Group(self.interface, name = role.__name__.title() + " on " interface.get_channel(self.id).guild.name + "/" + interface.get_channel(self.id))
+        await g.instantiate_channel()
+        return g
+        
     def sort_players(self, only_alive = False):
         players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
         players.sort(key = lambda x: roles.role_order.index(x.role.__class__))
@@ -159,5 +166,4 @@ class Game:
         return self.get_player_obj_at(n).id
 
     def get_player_obj_at(self, n):
-
         return self.sort_players(only_alive = False)[n - 1]
