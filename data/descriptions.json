@@ -3,7 +3,7 @@
     "name": "The Narrator",
     "description": "The Narrator, an instance to watch and lead this town to prosperity, or to despair",
     "abilities": "Everything",
-    "allignment": "Unknown?",
+    "alignment": "Unknown?",
     "usage": "None"
   },
 
@@ -11,107 +11,170 @@
     "name": "Villager",
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus ornare magna sit amet cursus. Donec sem odio, cursus id felis ac, congue vulputate turpis. Cras sagittis pulvinar odio, at tempor mi pretium rhoncus. Vestibulum tempor eget nunc et porttitor. Aenean tortor nisi, molestie nec porta tristique, commodo in neque. Suspendisse sagittis aliquam felis at scelerisque. Duis at commodo diam. Praesent vitae volutpat nunc. Donec et nisi id arcu iaculis aliquet sit amet eu tortor. ",
     "abilities": "Aenean vel tellus nulla. Phasellus pellentesque feugiat fringilla. Nullam ut pellentesque augue. Aliquam erat volutpat. Nunc et nunc fringilla tellus accumsan ullamcorper. Fusce efficitur tortor nec sodales feugiat. Sed tempus facilisis viverra. Aenean sollicitudin lectus sit amet tempor finibus. Proin mattis tempor ipsum sed malesuada. ",
-    "allignment": "Aenean auctor, neque molestie viverra suscipit, nisi felis egestas magna, et hendrerit arcu dui non urna. Phasellus aliquam venenatis felis nec pellentesque. Cras sed fringilla orci, faucibus pharetra nisl. Quisque commodo euismod ex, a egestas enim lacinia id. Nam magna eros, auctor sed est quis, luctus blandit nunc. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam ullamcorper auctor rutrum. Nulla erat urna, hendrerit in tellus a, consectetur porta nisl. ",
+    "alignment": "Aenean auctor, neque molestie viverra suscipit, nisi felis egestas magna, et hendrerit arcu dui non urna. Phasellus aliquam venenatis felis nec pellentesque. Cras sed fringilla orci, faucibus pharetra nisl. Quisque commodo euismod ex, a egestas enim lacinia id. Nam magna eros, auctor sed est quis, luctus blandit nunc. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam ullamcorper auctor rutrum. Nulla erat urna, hendrerit in tellus a, consectetur porta nisl. ",
     "usage": "Nunc nec sapien nisi. Nunc congue consectetur tellus non mollis. Nam pretium urna sit amet arcu tincidunt, vitae mattis erat interdum. Nullam ligula turpis, convallis congue lacinia nec, venenatis auctor dolor. Curabitur eget nulla at neque iaculis ultrices ut in lectus. In hac habitasse platea dictumst. Mauris tincidunt enim eu scelerisque cursus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce vel finibus purus. Maecenas tincidunt venenatis tempor. Mauris neque erat, varius sit amet suscipit et, pharetra ut nulla. "
   },
   "SEER": {
     "name": "The Seer",
     "description": "The Seer is an interpreter for signs provided from above. They use countless methods to obtain knowledge and protect their village",
     "abilities": "See a players alligment each night",
-    "allignment": "Village",
-    "usage": "Use `$see MEMBER` at night in a private chat with the Narrator to view a players allignment"
+    "alignment": "Village",
+    "usage": "Use `$see MEMBER` at night in a private chat with the Narrator to view a players alignment"
   },
   "GUARDIAN_ANGEL": {
     "name": "The Guardian Angel",
     "description": "The Guardian Angel is a protector and guide to those he trusts",
     "abilities": "May protect a player each night",
-    "allignment": "Village",
-    "usage": "User `guard PLAYER` at night in a private chat with the Narrator to view a players allignment"
+    "alignment": "Village",
+    "usage": "User `guard PLAYER` at night in a private chat with the Narrator to view a players alignment"
   },
   "ALCHEMIST": {
     "name": "The Alchemist",
     "description": "A practitioner of an ancient branch of natural philospohy, a philosophical and protoscientific tradition",
     "abilities": "May save a player, may kill a player",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "TO BE DECIDED"
   },
   "HUNTER": {
     "name": "The Hunter",
     "description": "The Hunter, a villager well versed in the arts of hunting, never seen with a dull blade",
     "abilities": "May kill a player shortly before dying",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "Use `$kill PLAYER` after death to kill a player. Remember that this ability is only available shortly after death and becomes unusable if waiting for too long"
   },
   "CUPID": {
     "name": "Cupid",
     "description": "The god of desire, erotic love, attraction and affection and a son of Venus and Mars",
     "abilities": "Can make two players fall in love on the first night. They can't live without each other and may win as the final pair",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "Use `pair PLAYER1 PLAYER2` on the first night to make two players fall in love"
   },
   "MAYOR": {
     "name": "The Mayor",
     "description": "The highest-ranking official in a municipal government such as the Village",
     "abilities": "Has more voting power than the average Villager",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "None"
   },
   "APPRENTICE_SEER": {
     "name": "The Apprentice Seer",
     "description": "An Apprentice to the divine Seer, knowledgeable enough to take their place, should something occur",
     "abilities": "Becomes a Seer once another Seer dies",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "None"
   },
   "KNIGHT": {
     "name": "The Knight",
     "description": "The Knight, holder of an honorary title of knighthood, powerfull enough to withstand a nightly blow without falling",
     "abilities": "Survives the first time being attacked",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "None"
   },
   "VIGILANTE": {
     "name": "The Vigilante",
     "description": "The Vigilante, bringer of their own law",
     "abilities": "May kill two players per game, but at most one per night",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "Use `kill PLAYER` at night in a private chat with the Narrator to choose a player to shoot"
   },
   "BOMBSHELL": {
     "name": "The Bombshell",
     "description": "The Bombshell, an explosive sleeper willing to bind their fate to that of their murderer",
     "abilities": "Will kill their murderer",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "None"
   },
   "RESURRECTIONIST": {
     "name": "The Resurrectionist",
     "description": "The Resurrectionist, a divine believer able to cross the barrier, seperating us from the deceased",
     "abilities": "May once ressurect another player",
-    "allignment": "Village",
+    "alignment": "Village",
     "usage": "Use `$ressurect PLAYER` at night in a private chat with the Narrator to revive the selected player"
   },
+  "MAILMAN": {
+    "name": "The Mailman",
+    "description": "The Mailman, sole entitiy in control of every single piece of information",
+    "abilities": "May broadcast an anonymous message each day",
+    "alignment": "Village",
+    "usage": "Use `$title TEXT` and `$content TEXT` to forge a letter to be displayed on sunrise. Use `$reset` to delete your letter"
+  },
+  "ORACLE": {
+    "name": "The Oracle",
+    "description": "The Oracle, blessed with the gift of infinite knowledge, cursed with never obtaining it themselves",
+    "abilites": "Each night, may reveal a players role to another player. Neither player may be The Oracle",
+    "alignment": "Village",
+    "usage": "Use `$reveal PLAYER1 PLAYER2` to reveal PLAYER1's role to PLAYER2 at sunrise"
+  },
+  "PRIEST": {
+    "name": "The Priest",
+    "description": "The Priest, a divine believer empowered by their faith",
+    "abilites": "Each night may use Holy Water to purify a player. This will kill the players if they are evil-aligned. Otherwise, The Priest will die instead",
+    "alignment": "Village",
+    "usage": "Use `$purify PLAYER` to choose a player to purify"
+  },
+  "BROTHER": {
+    "name": "The Brother",
+    "description": "The Brother, a Villager familiar with their siblings. They show an unconditioanl trust",
+    "abilites": "Knows the identities of the other Brothers (if there are any)",
+    "alignment": "Village",
+    "usage": "None"
+  },
+  "MASON": {
+    "name": "The Mason",
+    "description": "The Mason, a member of a guild, know since the fourteenth century",
+    "abilities": "Knows the identities of all other Masons",
+    "alignment": "Village (may be changed)",
+    "usage": "None"
+  },
+  "FOX": {
+    "name": "The Fox",
+    "description": "The Fox, bearer of a sixth sense, warning the Village of any evil intent",
+    "abilities": "Each night may choose three players. If none of them are Werewolves, lose this role and become a regular Villager",
+    "alignment": "Village",
+    "usage": "Use `$choose PLAYER1 PLAYER2 PLAYER3` to choose three players"
+  },
+  "TEACHER": {
+    "name": "The Teacher",
+    "description": "The Teacher, bearer of knowledge, with influence over the whole village",
+    "abilities": "The Teacher may not vote. Each day may choose up to two players. They are unable to vote that day",
+    "alignment": "Village",
+    "usage": "use `$voteblock PLAYER` to choose players to block from voting. Only the last two uses will be executed"
+  },
+  "LORD": {
+    "name": "The Lord",
+    "description": "The Lord, owner of a decently sized part of the village, with enough influence to convince large masses",
+    "abilities": "Once per game may grace a player that has been choosen to be hanged",
+    "alignment": "Village",
+    "usage": "Use `$grace` after a player has been decided to be hanged to grace them"
+  },
 
-  "WITCH": {
-    "name": "The Witch",
-    "description": "The Witch, a dreadful practitioner of magic and witchcraft",
-    "abilites": "TO BE DECIDED",
-    "allignment": "Evil",
-    "usage": "TO BE DECIDED"
+  "MAFIOSI": {
+    "name": "The Mafiosi",
+    "description": "The Mafiosi, a traveller of the underworld unknown to law and order",
+    "abilities": "Knows the identities of other Mafiosi. Every night may choose one person to be killed",
+    "alignment": "Evil",
+    "usage": "Use `$vote` at night to choose a player. The player with the most votes will be killed"
   },
   "WEREWOLF": {
     "name": "Werewolf",
     "description": "Is big bad evil",
     "abilities": "Can bite",
-    "allignment": "Very evil.",
+    "alignment": "Very evil.",
     "usage": "Teeth into neck"
   },
   "ALPHA": {
     "name": "Alpha",
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus ornare magna sit amet cursus. Donec sem odio, cursus id felis ac, congue vulputate turpis. Cras sagittis pulvinar odio, at tempor mi pretium rhoncus. Vestibulum tempor eget nunc et porttitor. Aenean tortor nisi, molestie nec porta tristique, commodo in neque. Suspendisse sagittis aliquam felis at scelerisque. Duis at commodo diam. Praesent vitae volutpat nunc. Donec et nisi id arcu iaculis aliquet sit amet eu tortor. ",
     "abilities": "Aenean vel tellus nulla. Phasellus pellentesque feugiat fringilla. Nullam ut pellentesque augue. Aliquam erat volutpat. Nunc et nunc fringilla tellus accumsan ullamcorper. Fusce efficitur tortor nec sodales feugiat. Sed tempus facilisis viverra. Aenean sollicitudin lectus sit amet tempor finibus. Proin mattis tempor ipsum sed malesuada. ",
-    "allignment": "Aenean auctor, neque molestie viverra suscipit, nisi felis egestas magna, et hendrerit arcu dui non urna. Phasellus aliquam venenatis felis nec pellentesque. Cras sed fringilla orci, faucibus pharetra nisl. Quisque commodo euismod ex, a egestas enim lacinia id. Nam magna eros, auctor sed est quis, luctus blandit nunc. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam ullamcorper auctor rutrum. Nulla erat urna, hendrerit in tellus a, consectetur porta nisl. ",
+    "alignment": "Aenean auctor, neque molestie viverra suscipit, nisi felis egestas magna, et hendrerit arcu dui non urna. Phasellus aliquam venenatis felis nec pellentesque. Cras sed fringilla orci, faucibus pharetra nisl. Quisque commodo euismod ex, a egestas enim lacinia id. Nam magna eros, auctor sed est quis, luctus blandit nunc. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam ullamcorper auctor rutrum. Nulla erat urna, hendrerit in tellus a, consectetur porta nisl. ",
     "usage": "Nunc nec sapien nisi. Nunc congue consectetur tellus non mollis. Nam pretium urna sit amet arcu tincidunt, vitae mattis erat interdum. Nullam ligula turpis, convallis congue lacinia nec, venenatis auctor dolor. Curabitur eget nulla at neque iaculis ultrices ut in lectus. In hac habitasse platea dictumst. Mauris tincidunt enim eu scelerisque cursus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce vel finibus purus. Maecenas tincidunt venenatis tempor. Mauris neque erat, varius sit amet suscipit et, pharetra ut nulla. "
+  },
+  "WITCH": {
+    "name": "The Witch",
+    "description": "The Witch, a dreadful practitioner of magic and witchcraft",
+    "abilites": "TO BE DECIDED",
+    "alignment": "Evil",
+    "usage": "TO BE DECIDED"
   },
 
 
@@ -119,7 +182,7 @@
     "name": "The Universal",
     "description": "The Univeral is a practitioner of diverse arts, suitable for many tasks. The Univeral controls their own fate",
     "abilities": "Can choose their role",
-    "allignment": "None, will change on first day",
+    "alignment": "None, will change on first day",
     "usage": "Use `$choose ROLE` to pick a role. This action has to be completed by the first night. If not, the Universal will become a regular Villager"
   }
 }
