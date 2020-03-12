@@ -26,7 +26,7 @@
     "description": "The Guardian Angel is a protector and guide to those he trusts",
     "abilities": "May protect a player each night",
     "allignment": "Village",
-    "usage": "User `$guard PLAYER` at night in a private chat with the Narrator to view a players allignment"
+    "usage": "Use `$guard PLAYER` at night in a private chat with the Narrator to guard a player"
   },
   "ALCHEMIST": {
     "name": "The Alchemist",
@@ -47,7 +47,7 @@
     "description": "The god of desire, erotic love, attraction and affection and a son of Venus and Mars",
     "abilities": "Can make two players fall in love on the first night. They can't live without each other and may win as the final pair",
     "allignment": "Village",
-    "usage": "Use `pair PLAYER1 PLAYER2` on the first night to make two players fall in love"
+    "usage": "Use `$pair PLAYER1 PLAYER2` on the first night to make two players fall in love"
   },
   "MAYOR": {
     "name": "The Mayor",
@@ -75,7 +75,7 @@
     "description": "The Vigilante, bringer of their own law",
     "abilities": "May kill two players per game, but at most one per night",
     "allignment": "Village",
-    "usage": "Use `kill PLAYER` at night in a private chat with the Narrator to choose a player to shoot"
+    "usage": "Use `$kill PLAYER` at night in a private chat with the Narrator to choose a player to shoot"
   },
   "BOMBSHELL": {
     "name": "The Bombshell",
