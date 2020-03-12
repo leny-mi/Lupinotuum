@@ -1,6 +1,5 @@
 from game import role
 from game.flags import Flags
-from usable import group
 
 
 # Good Roles
@@ -29,7 +28,7 @@ class Seer(Good):
     pass
 
 
-class Ressurectionist(Good):
+class Resurrectionist(Good):
     pass
 
 
@@ -183,12 +182,12 @@ class Actor(Neutral):
 
 
 good_roles = {Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight, Vigilante,
-              Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord}
+              Bombshell, Resurrectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord}
 evil_roles = {Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, Witch, White}
 neutral_roles = {Survivor, Executioner, Protector, Jester, Universal, Copycat, Actor}
 
 all_roles = good_roles.union(evil_roles).union(neutral_roles)
 role_order = [Witch, Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight,
-              Vigilante, Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord,
+              Vigilante, Bombshell, Resurrectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord,
               Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, White, Survivor,
               Executioner, Protector, Jester, Universal, Copycat, Actor]

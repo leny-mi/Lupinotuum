@@ -5,7 +5,7 @@ Game setup:
 1. $setup
 2. "Setting up game...", caller saved as gamemaster
 3. "React here to enter. @gamemaster enter $continue when all players are signed up.", react something to msg
-4. $contine
+4. $continue
 5. Choose character list (or create new character list)
 6. Assert everything completed
 8. "Please join here for private communication: ...."
@@ -14,6 +14,6 @@ Game setup:
 
 1b "Game already running."
 4b "Not enough players."
-6b "An error occured" or "The following error occured: xxx" -> maybe upload what lead to error
+6b "An error occurred" or "The following error occurred: xxx" -> maybe upload what lead to error
 9b "Not all players have joined, please join by mm:hh on dd/mm/yyyy"
 Create character list (in future)

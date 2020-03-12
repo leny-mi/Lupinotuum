@@ -87,9 +87,9 @@
   "RESURRECTIONIST": {
     "name": "The Resurrectionist",
     "description": "The Resurrectionist, a divine believer able to cross the barrier, seperating us from the deceased",
-    "abilities": "May once ressurect another player",
+    "abilities": "May once resurrect another player",
     "alignment": "Village",
-    "usage": "Use `$ressurect PLAYER` at night in a private chat with the Narrator to revive the selected player"
+    "usage": "Use `$resurrect PLAYER` at night in a private chat with the Narrator to revive the selected player"
   },
   "MAILMAN": {
     "name": "The Mailman",

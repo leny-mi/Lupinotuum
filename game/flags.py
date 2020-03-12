@@ -1,5 +1,6 @@
 import enum
 
+
 class Flags(enum.Enum):
     # Town roles
     VOTE_READY = 0
