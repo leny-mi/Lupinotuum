@@ -332,12 +332,14 @@ class MyClient(discord.Client):
 
     # Send a message to a user
     async def game_direct(self, user_id, message):
+        if self.get_user(user_id).dm_channel is None:
+            await self.get_user(user_id).create_dm()
         await self.get_user(user_id).dm_channel.send(message)
 
     # End the game
-    def end_game(id):
-        self.game_broadcast(id, "The game has ended. Use `$setup` to start another game")
-        self.state_map.pop(id)
+    async def end_game(self, id):
+        await self.game_broadcast(id, "The game has ended. Use `$setup` to start another game")
+        await self.state_map.pop(id)
 
 
 if not datamanager.check_json():

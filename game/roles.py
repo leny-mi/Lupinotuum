@@ -1,105 +1,136 @@
 from game import role
+from game.flags import Flags
 from usable import group
+
 
 # Good Roles
 
 class Good(role.Role):
     pass
 
+
 class Hunter(Good):
     pass
+
 
 class Guardian_Angel(Good):
     pass
 
+
 class Villager(Good):
     pass
+
 
 class Vigilante(Good):
     pass
 
+
 class Seer(Good):
     pass
+
 
 class Ressurectionist(Good):
     pass
 
+
 class Priest(Good):
     pass
+
 
 class Oracle(Good):
     pass
 
+
 class Mayor(Good):
     pass
+
 
 class Mason(Good):
     pass
 
+
 class Mailman(Good):
     pass
+
 
 class Knight(Good):
     pass
 
+
 class Cupid(Good):
     pass
+
 
 class Brother(Good):
     pass
 
+
 class Bombshell(Good):
     pass
+
 
 class Apprentice_Seer(Good):
     pass
 
+
 class Alchemist(Good):
     pass
+
 
 class Fox(Good):
     pass
 
+
 class Teacher(Good):
     pass
 
+
 class Lord(Good):
     pass
+
 
 # Evil Roles
 
 class Evil(role.Role):
     pass
 
+
 class Alpha(Evil):
     pass
+
 
 class Ancient(Evil):
     pass
 
+
 class Cultist(Evil):
     pass
+
 
 class Mafiosi(Evil):
     pass
 
+
 class Serial_Killer(Evil):
     pass
+
 
 class Teenage_Werewolf(Evil):
     pass
 
+
 class Vampire(Evil):
     pass
 
+
 class Werewolf(Evil):
     async def on_message(self, game, message):
-        super(game, message, self)
-        do_vote_action(game, message, flag = Flags.ABILITY_READY)
+        await super().on_message(game, message)
+        await self.do_vote_action(game, message, flag=Flags.ABILITY_READY)
 
-    async def on_gamestart(self, game):
+    async def on_game_start(self, game):
         if Werewolf not in game.channels:
-            game.channels[Werewolf] = game.create_group(Werewolf)
+            game.channels[Werewolf] = await game.create_group(Werewolf)
         game.channels[Werewolf].add_user(self.player.id)
 
     async def on_nightfall(self, game):
@@ -108,8 +139,10 @@ class Werewolf(Evil):
     async def on_postnight(self, name):
         self.flags.remove(Flags.ABILITY_READY)
 
+
 class Witch(Evil):
     pass
+
 
 class White(Evil):
     pass
@@ -120,31 +153,42 @@ class White(Evil):
 class Neutral(role.Role):
     pass
 
+
 class Universal(Neutral):
     pass
+
 
 class Survivor(Neutral):
     pass
 
+
 class Protector(Neutral):
     pass
+
 
 class Jester(Neutral):
     pass
 
+
 class Executioner(Neutral):
     pass
 
+
 class Copycat(Neutral):
     pass
+
 
 class Actor(Neutral):
     pass
 
 
-good_roles    = {Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight, Vigilante, Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord}
-evil_roles    = {Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, Witch, White}
+good_roles = {Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight, Vigilante,
+              Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord}
+evil_roles = {Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, Witch, White}
 neutral_roles = {Survivor, Executioner, Protector, Jester, Universal, Copycat, Actor}
 
 all_roles = good_roles.union(evil_roles).union(neutral_roles)
-role_order = [Witch, Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight, Vigilante, Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord, Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, White, Survivor, Executioner, Protector, Jester, Universal, Copycat, Actor]
+role_order = [Witch, Villager, Seer, Guardian_Angel, Alchemist, Hunter, Cupid, Mayor, Apprentice_Seer, Knight,
+              Vigilante, Bombshell, Ressurectionist, Mailman, Oracle, Priest, Brother, Mason, Fox, Teacher, Lord,
+              Mafiosi, Werewolf, Alpha, Teenage_Werewolf, Vampire, Serial_Killer, Cultist, Ancient, White, Survivor,
+              Executioner, Protector, Jester, Universal, Copycat, Actor]

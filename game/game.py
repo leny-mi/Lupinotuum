@@ -14,16 +14,16 @@ from usable import group
 class Game:
 
     def __init__(self, interface, player_list, id, character_list, time):
-        self.interface = interface # IO interface
-        self.players_list = player_list # List of player IDs
-        self.id = id # Game ID
-        self.character_list = character_list # List of roles
-        self.time = time # Time Object
+        self.interface = interface            # IO interface
+        self.players_list = player_list       # List of player IDs
+        self.id = id                          # Game ID
+        self.character_list = character_list  # List of roles
+        self.time = time                      # Time Object
 
         # self.players_alive = player_list.copy() # Maybe not needed
-        self.player_objs = {} # Map IDs to Objects
-        self.votes       = {} # Map IDs to Votes
-        self.channels    = {} # Map role to channels
+        self.player_objs = {}  # Map IDs to Objects
+        self.votes = {}        # Map IDs to Votes
+        self.channels = {}     # Map role to channels
 
         self.day_n = 1
         self.tie = 0
@@ -44,7 +44,7 @@ class Game:
             self.player_objs[player_id] = (player.Player(player_id, role, name = username))
         await self.interface.game_broadcast(self.id, "Initializing game")
         for cplayer in self.sort_players():
-            await cplayer.role.on_gamestart(self)
+            await cplayer.role.on_game_start(self)
 
     async def commence_day(self):
         #TODO Day stuff
@@ -82,7 +82,7 @@ class Game:
         if len(most_voted) > 1:
             await self.interface.game_broadcast(self.id, "There has been a tie between " + " and ".join([", ".join(list(map(lambda x: x.name, most_voted[:-1]))), most_voted[-1].name]) + "\nVote again on either of them by "+self.time.get_next_time_string(19,0))
             for player in self.sort_players(only_alive = True):
-                await player.role.on_defense(self)
+                await player.role.on_defense(self, most_voted)
                 await player.role.on_votestart(self)
             self.tie += 1
 
@@ -144,7 +144,7 @@ class Game:
             await player.role.on_playerdeath(self, player, murderer)
 
     async def create_group(self, role):
-        g = group.Group(self.interface, name = role.__name__.title() + " on " interface.get_channel(self.id).guild.name + "/" + interface.get_channel(self.id))
+        g = group.Group(self.interface, name=role.__name__.title() + " on " + self.interface.get_channel(self.id).guild.name + "/" + self.interface.get_channel(self.id).name)
         await g.instantiate_channel()
         return g
         

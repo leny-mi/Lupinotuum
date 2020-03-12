@@ -4,12 +4,10 @@ from game.flags import Flags
 
 class Role:
 
-
-
     def __init__(self, player):
-        self.player = player # Reference to this player
-        self.flags = set() # Set of this roles flags
-        self.lovers = set() # Set of this roles lovers
+        self.player = player  # Reference to this player
+        self.flags = set()    # Set of this roles flags
+        self.lovers = set()   # Set of this roles lovers
 
         self.vote_for = None # Player INDEX to vote for
 
@@ -20,14 +18,14 @@ class Role:
             print("Debug: List Players")
             await game.interface.game_direct(self.player.id, "The following players are still in the game:\n" + game.get_player_list())
 
-
         if message.startswith('vote ') and Flags.VOTE_READY in self.flags:
             try:
                 self.vote_for = int(message.split(' ')[1])
+                await game.interface.game_direct(self.player.id, "You have voted for " + game.get_player_obj_at(self.vote_for).name)
             except ValueError:
                 await game.interface.game_direct(self.player.id, "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
 
-    async def on_gamestart(self, game):
+    async def on_game_start(self, game):
         pass
 
     async def on_nightfall(self, game):
@@ -53,14 +51,14 @@ class Role:
             await game.interface.game_direct(self.player.id, "You are on trial. You may defend yourself to escape death.")
 
     async def on_deathrow(self, game, player):
-        ## TODO: you are on trial
+        # TODO: you are on trial
         if self.player == player:
-            #await game.interface.game_broadcast(game.id, player.name + " is on death row.")
+            # await game.interface.game_broadcast(game.id, player.name + " is on death row.")
             pass
-        #DO DEATH
+        # TODO: DO DEATH
 
     async def on_hang(self, game, player):
-        ## TODO: you have been hanged
+        # TODO: you have been hanged
         if self.player == player:
             if Flags.GRACED in self.flags:
                 await game.interface.game_broadcast(game.id, self.player.name + " has been graced.")
@@ -71,39 +69,38 @@ class Role:
             pass
 
     async def on_playerdeath(self, game, player, muderer):
-        #game.players_alive.remove(player)
+        # game.players_alive.remove(player)
         if player in self.lovers:
             await game.interface.game_broadcast(game.id, self.player.name + " died because of their love to " + player.name)
 
             await game.player_die(self.player, None)
 
-    async def on_ressurect(self, game):
-        pass ## TODO:
+    async def on_resurrect(self, game):
+        pass
+        # TODO:
 
     async def on_changerole(self, game, role):
-        player.role = role(self.player)
-        await game.interface.game_direct(self.player.id, "Your role has been changed to " + player.role.__class__.__name__.title())
-
+        self.player.role = role(self.player)
+        await game.interface.game_direct(self.player.id, "Your role has been changed to " + self.player.role.__class__.__name__.title())
 
     async def on_inhibit(self, game):
-        pass
+        self.add(Flags.INHIBITED)
 
     async def on_inlove(self, game, player):
         self.lovers.add(player)
 
-    async def on_attacked(self, game, attacker_role):
+    async def on_attacked(self, game, attacker):
         await game.interface.game_broadcast(game.id, self.player.name + " has died because of an attack by a "+attacker.__class__.__name__.title())
 
-
     async def on_guard(self, game):
-        ## TODO: you have been guarded
+        # TODO: you have been guarded
         self.flags.add(Flags.GUARDED)
 
     async def on_grace(self, game):
-        ## TODO: you have been graced
+        # TODO: you have been graced
         self.flags.add(Flags.GRACED)
 
-    def do_vote_action(self, game, message, flag = Flags.VOTE_READY):
+    async def do_vote_action(self, game, message, flag = Flags.VOTE_READY):
         if message.startswith('vote ') and flag in self.flags:
             try:
                 value = int(message.split(' ')[1])
