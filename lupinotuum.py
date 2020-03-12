@@ -36,6 +36,12 @@ class MyClient(discord.Client):
         self.role_list = {}  # Map channel to role list
         self.react_map = {}  # Map channel to react message
         self.state_map = {}  # Map channel to state
+        if len(list(filter(lambda x: x.name == "WEREWOLF GAMES", self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
+            await self.create_category_channel('WEREWOLF GAMES')
+        # TODO: Move this to database or something (also move same code in group.py)
+        for text_channel in next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if x.name == "WEREWOLF GAMES").text_channels:
+            await text_channel.delete()
+
         print('Logged on as', self.user)
         await client.change_presence(activity=discord.Game(name='Write $setup to start a game'))
 
@@ -59,7 +65,6 @@ class MyClient(discord.Client):
         if message.channel.type == discord.ChannelType.private:
             await self.parse_player_message(message)
 
-        # User writes $setup while a game in runnning
 
         # Debug
         await self.debug_commands(message)
@@ -69,7 +74,7 @@ class MyClient(discord.Client):
         # GAME SETUP
 
         # User writes $setup, game to be started
-        if not message.channel.id in self.state_map:
+        if message.channel.id not in self.state_map:
             if message.content == "$setup":
                 # TODO SETUP
                 print("Debug: Setup initialized")
@@ -84,8 +89,8 @@ class MyClient(discord.Client):
             self.state_map[message.channel.id] = 1
             message = await message.channel.fetch_message(self.react_map[message.channel.id].id)
             count = list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].count - 1
-            if count < 0:  ## TODO:  Enable this filter again (set on 4)
-                count = max(4, count)  ## TODO:  Remove this after debug phase
+            if count < 0:  # TODO:  Enable this filter again (set on 4)
+                count = max(4, count)  # TODO:  Remove this after debug phase
                 await message.channel.send("Not enough players. There should be at least 4")
                 self.state_map.pop(message.channel.id)
                 return
@@ -195,10 +200,10 @@ class MyClient(discord.Client):
 
             self.state_map[message.channel.id] = 2
 
-            # TODO INITIALIZE GAME HERE
-            ## TODO: ENTER TIME ZONE
-            # self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
-            # await self.game_map[message.channel.id].time_scheduler();
+        # TODO INITIALIZE GAME HERE
+        ## TODO: ENTER TIME ZONE
+        # self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
+        # await self.game_map[message.channel.id].time_scheduler();
 
 
         elif self.state_map[message.channel.id] == 2 and message.content[:10] == '$timezone ':
@@ -222,8 +227,8 @@ class MyClient(discord.Client):
                 self.in_game_map[player_id].pop(message.channel.id)
             self.state_map.pop(message.channel.id)
 
-            # except:
-            #    await message.channel.send('Unknown timezone. Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
+        # except:
+        #    await message.channel.send('Unknown timezone. Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
 
     # Debug stuff
     async def debug_commands(self, message):

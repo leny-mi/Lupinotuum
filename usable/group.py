@@ -13,7 +13,9 @@ class Group:
         self.channel = None
 
     async def instantiate_channel(self):
-        category = self.guild.get_channel(685952096981221442)
+        if len(list(filter(lambda x: x.name == "WEREWOLF GAMES", self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
+            await self.client.create_category_channel('WEREWOLF GAMES')
+        category = self.guild.get_channel(next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if x.name == "WEREWOLF GAMES").text_channels)
         overwrites = {
             self.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             self.guild.me: discord.PermissionOverwrite(read_messages=True)
