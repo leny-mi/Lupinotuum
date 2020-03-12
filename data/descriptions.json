@@ -26,7 +26,7 @@
     "description": "The Guardian Angel is a protector and guide to those he trusts",
     "abilities": "May protect a player each night",
     "alignment": "Village",
-    "usage": "User `guard PLAYER` at night in a private chat with the Narrator to view a players alignment"
+    "usage": "User `$guard PLAYER` at night in a private chat with the Narrator to view a players alignment"
   },
   "ALCHEMIST": {
     "name": "The Alchemist",
