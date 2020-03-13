@@ -123,14 +123,14 @@ class Vampire(Evil):
 
 
 class Werewolf(Evil):
-    async def on_message(self, game, message):
-        await super().on_message(game, message)
+    async def on_private_message(self, game, message):
+        await super().on_private_message(game, message)
         await self.do_vote_action(game, message, flag=Flags.ABILITY_READY)
 
     async def on_game_start(self, game):
         if Werewolf not in game.channels:
             game.channels[Werewolf] = await game.create_group(Werewolf)
-        game.channels[Werewolf].add_user(self.player.id)
+        game.channels[Werewolf].add_user(self.player.player_id)
 
     async def on_nightfall(self, game):
         self.flags.add(Flags.ABILITY_READY)

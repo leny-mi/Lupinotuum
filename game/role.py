@@ -12,21 +12,21 @@ class Role:
 
         self.vote_for = None  # Player INDEX to vote for
 
-    async def on_message(self, game, message):
+    async def on_private_message(self, game, message):
         print(self.player.name, ": ", message)
 
         if message == 'players':
             print("Debug: List Players")
-            await game.interface.game_direct(self.player.id,
+            await game.interface.game_direct(self.player.player_id,
                                              "The following players are still in the game:\n" + game.get_player_list())
 
         if message.startswith('vote ') and Flags.VOTE_READY in self.flags:
             try:
                 self.vote_for = int(message.split(' ')[1])
-                await game.interface.game_direct(self.player.id,
+                await game.interface.game_direct(self.player.player_id,
                                                  "You have voted for " + game.get_player_obj_at(self.vote_for).name)
             except ValueError:
-                await game.interface.game_direct(self.player.id,
+                await game.interface.game_direct(self.player.player_id,
                                                  "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
 
     async def on_game_start(self, game):

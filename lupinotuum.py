@@ -14,7 +14,7 @@ from game import presets
 from game import game
 
 
-class MyClient(discord.Client):
+class WerewolfBot(discord.Client):
     in_game_map: Dict[int, set]
     time_map: Dict[int, time_difference.Time]
     player_map: Dict[int, list]
@@ -24,6 +24,8 @@ class MyClient(discord.Client):
     role_list: Dict[int, list]
     react_map: Dict[int, discord.Message]
     state_map: Dict[int, int]
+    group_map: Dict[int, list]
+    category_id: int
 
     async def on_ready(self):
 
@@ -36,34 +38,49 @@ class MyClient(discord.Client):
         self.role_list = {}  # Map channel to role list
         self.react_map = {}  # Map channel to react message
         self.state_map = {}  # Map channel to state
+        self.group_map = {}  # Map channel to list of group
+        self.category_id = None  # Category channel id to spawn groups in
+
         if len(list(filter(lambda x: x.name == "WEREWOLF GAMES",
                            self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
-            await self.create_category_channel('WEREWOLF GAMES')
+            werewolf_channel = await self.create_category_channel('WEREWOLF GAMES')
+            self.category_id = werewolf_channel.id
+        else:
+            self.category_id = next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if
+                                    x.name == "WEREWOLF GAMES").id
+
         # TODO: Move this to database or something (also move same code in group.py)
-        for text_channel in next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if
-                                 x.name == "WEREWOLF GAMES").text_channels:
+        for text_channel in self.get_channel(self.category_id).text_channels:
             await text_channel.delete()
 
         print('Logged on as', self.user)
         await client.change_presence(activity=discord.Game(name='Write $setup to start a game'))
 
-    async def on_message(self, message):
-        # Don't react to bots
+    async def on_message(self, message: discord.Message):
+        # Don't react to bots and only react to commands containing $ or .
         if message.author.bot or ('$' not in message.content and '.' not in message.content):
             return
 
-        # User uses "info"
+        # User uses information calls, possible in every chat
         if await self.information_calls(message):
             return
 
-        # Setup game
+        # Group message
+        if message.channel.type == discord.ChannelType.text and message.channel.category_id == self.category_id:
+            # TODO: Route to guild
+            return
+
+        # User starts game setup
         if message.channel.type == discord.ChannelType.text and (
                 message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3):
             await self.setup(message)
+
+        # User uses $setup incorrectly
         elif message.channel.type == discord.ChannelType.text and message.content == "$setup":  # Send a message only on $setup to avoid confusion
             await message.channel.send('Game is already running. There can only be ohne game per text channel.')
             return
-        # else: # Route Message to role (io -> game -> player -> role -> on_message)
+
+        # else: Route Message to role (io -> game -> player -> role -> on_message)
         if message.channel.type == discord.ChannelType.private:
             await self.parse_player_message(message)
 
@@ -106,7 +123,7 @@ class MyClient(discord.Client):
 
         # Set a preset
         elif self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset ':
-            self.role_list[message.channel.id] = presets.Preset.get_preset(message.content[8:],
+            self.role_list[message.channel.id] = presets.get_preset(message.content[8:],
                                                                            self.count_map[message.channel.id] + 1)
             await message.channel.send("Set preset to " + message.content[8:])
 
@@ -356,8 +373,9 @@ class MyClient(discord.Client):
         print("Debug: Relay private message")
         print("Debug: In Games:", games)
         print("Debug: Game has players:", self.game_map[games[0]].player_objs.keys())
-        await self.game_map[games[0]].player_objs[message.author.id].role.on_message(self.game_map[games[0]],
-                                                                                     message.content.split('$')[1])
+        await self.game_map[games[0]].player_objs[message.author.id].role.on_private_message(self.game_map[games[0]],
+                                                                                             message.content.split('$')[
+                                                                                                 1])
 
     # Send a message to a game channel
     async def game_broadcast(self, game_id, message):
@@ -379,10 +397,7 @@ if not datamanager.check_json():
     print("Error: Multiple errors have occurred. Bot has not been started")
     quit()
 
-client = MyClient(activity=discord.Activity(name='Write $setup to start a game', type=discord.ActivityType.custom))
-
-# with open('config.json') as configfile:
-#    data = json.load(configfile)
+client = WerewolfBot(activity=discord.Activity(name='Write $setup to start a game', type=discord.ActivityType.custom))
 
 try:
     client.run(datamanager.get_config('token'))

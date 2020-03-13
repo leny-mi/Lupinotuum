@@ -5,26 +5,19 @@ from game import player
 
 from usable import group
 
-
-# import usable.time_difference.Time
-# from datetime import timedelta, datetime
-# from game import player
-# import game.roles
-# from usable import utils
-
 class Game:
 
-    def __init__(self, interface, player_list, id, character_list, time):
+    def __init__(self, interface, player_list, game_id, character_list, time):
         self.interface = interface  # IO interface
         self.players_list = player_list  # List of player IDs
-        self.id = id  # Game ID
+        self.id = game_id  # Game ID
         self.character_list = character_list  # List of roles
         self.time = time  # Time Object
 
         # self.players_alive = player_list.copy() # Maybe not needed
         self.player_objs = {}  # Map IDs to Objects
         self.votes = {}  # Map IDs to Votes
-        self.channels = {}  # Map role to channels
+        self.groups = {}  # Map role to channels
 
         self.day_n = 1
         self.tie = 0
@@ -45,6 +38,7 @@ class Game:
         await self.interface.game_broadcast(self.id, "Initializing game")
         for concrete_player in self.sort_players():
             await concrete_player.role.on_game_start(self)
+        await self.refresh_groups()
 
     async def commence_day(self):
         # TODO Day stuff
@@ -56,6 +50,7 @@ class Game:
         self.to_die = None
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_sunrise(self)
+        await self.refresh_groups()
 
     async def commence_vote(self):
         # TODO Vote stuff
@@ -64,6 +59,7 @@ class Game:
         await self.interface.game_broadcast(self.id, "Vote has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_votestart(self)
+        await self.refresh_groups()
 
     async def commence_voteend(self):
         # TODO Defense stuff
@@ -95,6 +91,8 @@ class Game:
             self.tie = 0
             for concrete_player in self.sort_players(only_alive=True):
                 await concrete_player.role.on_deathrow(self, self.to_die)
+
+        await self.refresh_groups()
 
     async def commence_tiebreaker(self):
         # TODO Tiebreaker stuff
@@ -129,6 +127,8 @@ class Game:
             for concrete_player in self.sort_players(only_alive=True):
                 await concrete_player.role.on_deathrow(self, self.to_die)
 
+        await self.refresh_groups()
+
     async def commence_hanging(self):
         print("Debug: Hanging has started")
         if self.to_die is None:
@@ -136,6 +136,7 @@ class Game:
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_hang(self, self.to_die)
         # await self.interface.game_broadcast(self.id, self.to_die.name + " has been hanged.")
+        await self.refresh_groups()
 
     async def commence_night(self):
         # TODO Night stuff
@@ -143,22 +144,28 @@ class Game:
         await self.interface.game_broadcast(self.id, "Night has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_nightfall(self)
+        await self.refresh_groups()
 
     #
     async def player_die(self, dead_player, murderer):
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_playerdeath(self, dead_player, murderer)
 
-    async def create_group(self, role):
-        g = group.Group(self.interface, name=role.__name__.title() + " on " + self.interface.get_channel(
-            self.id).guild.name + "/" + self.interface.get_channel(self.id).name)
+    async def create_group(self, group_bind):
+        g = group.Group(self.interface, name=group_bind + "_on_" + self.interface.get_channel(
+            self.id).guild.name + "_" + self.interface.get_channel(self.id).name)
         await g.instantiate_channel()
+        self.groups[group_bind] = g
         return g
+
+    async def refresh_groups(self):
+        for concrete_group in self.groups:
+            concrete_group.refresh_members()
 
     def sort_players(self, only_alive=False):
         players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
         players.sort(key=lambda x: roles.role_order.index(x.role.__class__))
-        return list(filter(lambda x: not only_alive or x.alive, players))
+        return list(filter(lambda x: not only_alive or x.is_alive, players))
 
     def add_vote(self, player_id, vote_count):
         if player_id not in self.votes:
@@ -168,8 +175,8 @@ class Game:
 
     def get_player_list(self, only=True, alive=False):
         return "\n".join(map(lambda x: " ".join([str(x[0] + 1), '-', x[1].name]),
-                             filter(lambda y: y[1].alive or not only != alive,
-                                    enumerate(map(lambda z: self.player_objs[z], self.players_list)))))
+                             filter(lambda y: y[1].is_alive or not only != alive,
+                                    enumerate(map(lambda z: self.player_objs[z], self.sort_players(only_alive=False))))))
 
     def get_player_id_at(self, n):
         return self.get_player_obj_at(n).id
