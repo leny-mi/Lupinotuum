@@ -17,7 +17,7 @@
   "SEER": {
     "name": "The Seer",
     "description": "The Seer is an interpreter for signs provided from above. They use countless methods to obtain knowledge and protect their village",
-    "abilities": "See a players alligment each night",
+    "abilities": "See a players alignment each night",
     "alignment": "Village",
     "usage": "Use `$see MEMBER` at night in a private chat with the Narrator to view a players alignment"
   },
@@ -30,7 +30,7 @@
   },
   "ALCHEMIST": {
     "name": "The Alchemist",
-    "description": "A practitioner of an ancient branch of natural philospohy, a philosophical and protoscientific tradition",
+    "description": "A practitioner of an ancient branch of natural philosophy, a philosophical and protoscientific tradition",
     "abilities": "May save a player, may kill a player",
     "alignment": "Village",
     "usage": "TO BE DECIDED"
@@ -65,7 +65,7 @@
   },
   "KNIGHT": {
     "name": "The Knight",
-    "description": "The Knight, holder of an honorary title of knighthood, powerfull enough to withstand a nightly blow without falling",
+    "description": "The Knight, holder of an honorary title of knighthood, powerful enough to withstand a nightly blow without falling",
     "abilities": "Survives the first time being attacked",
     "alignment": "Village",
     "usage": "None"
@@ -86,14 +86,14 @@
   },
   "RESURRECTIONIST": {
     "name": "The Resurrectionist",
-    "description": "The Resurrectionist, a divine believer able to cross the barrier, seperating us from the deceased",
+    "description": "The Resurrectionist, a divine believer able to cross the barrier, separating us from the deceased",
     "abilities": "May once resurrect another player",
     "alignment": "Village",
     "usage": "Use `$resurrect PLAYER` at night in a private chat with the Narrator to revive the selected player"
   },
   "MAILMAN": {
     "name": "The Mailman",
-    "description": "The Mailman, sole entitiy in control of every single piece of information",
+    "description": "The Mailman, sole entity in control of every single piece of information",
     "abilities": "May broadcast an anonymous message each day",
     "alignment": "Village",
     "usage": "Use `$title TEXT` and `$content TEXT` to forge a letter to be displayed on sunrise. Use `$reset` to delete your letter"
@@ -101,21 +101,21 @@
   "ORACLE": {
     "name": "The Oracle",
     "description": "The Oracle, blessed with the gift of infinite knowledge, cursed with never obtaining it themselves",
-    "abilites": "Each night, may reveal a players role to another player. Neither player may be The Oracle",
+    "abilities": "Each night, may reveal a players role to another player. Neither player may be The Oracle",
     "alignment": "Village",
     "usage": "Use `$reveal PLAYER1 PLAYER2` to reveal PLAYER1's role to PLAYER2 at sunrise"
   },
   "PRIEST": {
     "name": "The Priest",
     "description": "The Priest, a divine believer empowered by their faith",
-    "abilites": "Each night may use Holy Water to purify a player. This will kill the players if they are evil-aligned. Otherwise, The Priest will die instead",
+    "abilities": "Each night may use Holy Water to purify a player. This will kill the players if they are evil-aligned. Otherwise, The Priest will die instead",
     "alignment": "Village",
     "usage": "Use `$purify PLAYER` to choose a player to purify"
   },
   "BROTHER": {
     "name": "The Brother",
-    "description": "The Brother, a Villager familiar with their siblings. They show an unconditioanl trust",
-    "abilites": "Knows the identities of the other Brothers (if there are any)",
+    "description": "The Brother, a Villager familiar with their siblings. They show an unconditional trust",
+    "abilities": "Knows the identities of the other Brothers (if there are any)",
     "alignment": "Village",
     "usage": "None"
   },
@@ -143,7 +143,7 @@
   "LORD": {
     "name": "The Lord",
     "description": "The Lord, owner of a decently sized part of the village, with enough influence to convince large masses",
-    "abilities": "Once per game may grace a player that has been choosen to be hanged",
+    "abilities": "Once per game may grace a player that has been chosen to be hanged",
     "alignment": "Village",
     "usage": "Use `$grace` after a player has been decided to be hanged to grace them"
   },
@@ -172,7 +172,7 @@
   "WITCH": {
     "name": "The Witch",
     "description": "The Witch, a dreadful practitioner of magic and witchcraft",
-    "abilites": "TO BE DECIDED",
+    "abilities": "TO BE DECIDED",
     "alignment": "Evil",
     "usage": "TO BE DECIDED"
   },
@@ -180,7 +180,7 @@
 
   "UNIVERSAL": {
     "name": "The Universal",
-    "description": "The Univeral is a practitioner of diverse arts, suitable for many tasks. The Univeral controls their own fate",
+    "description": "The Universal is a practitioner of diverse arts, suitable for many tasks. The Universal controls their own fate",
     "abilities": "Can choose their role",
     "alignment": "None, will change on first day",
     "usage": "Use `$choose ROLE` to pick a role. This action has to be completed by the first night. If not, the Universal will become a regular Villager"

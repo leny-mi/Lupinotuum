@@ -5,12 +5,12 @@ def check_json():
     try:
         with open('data/config.json') as configfile:
             data = json.load(configfile)
-            needed_attributes = ['token', 'covert_server', 'invite_link'] # Enter all needed attributes in json here
+            needed_attributes = ['token', 'covert_server', 'invite_link']  # Enter all needed attributes in json here
             correct = True
             for attribute in needed_attributes:
                 if attribute not in data:
                     correct = False
-                    print("Error: Attribute "+attribute+" not found. Please enter "+attribute+" in config.json")
+                    print("Error: Attribute " + attribute + " not found. Please enter " + attribute + " in config.json")
             return correct
     except FileNotFoundError:
         print('Error: config.json not found. Did you forget to add one?')

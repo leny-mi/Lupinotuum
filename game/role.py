@@ -92,7 +92,7 @@ class Role:
                                          "Your role has been changed to " + self.player.role.__class__.__name__.title())
 
     async def on_inhibit(self, game):
-        self.add(Flags.INHIBITED)
+        self.flags.add(Flags.INHIBITED)
 
     async def on_inlove(self, game, player):
         self.lovers.add(player)

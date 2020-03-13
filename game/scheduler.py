@@ -1,6 +1,5 @@
 import asyncio
 
-from game import game
 # from usable import time_difference
 from data import datamanager
 from usable import utils
@@ -30,7 +29,7 @@ class Scheduler:
 
         if not utils.check_all_players_joined(self.interface, self.game_obj.players_list):
             await self.interface.game_broadcast(self.game_obj.id,
-                                                "Not all players have joined. Please join https://discord.gg/" + datamanager.getConfig(
+                                                "Not all players have joined. Please join https://discord.gg/" + datamanager.get_config(
                                                     'invite_link') + ' for private communications\nGame with ID ' + str(
                                                     self.game_obj.id) + ' will start at ' + self.time.get_next_time_string(
                                                     20, 0))

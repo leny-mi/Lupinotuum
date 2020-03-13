@@ -15,7 +15,7 @@ from game import game
 
 
 class MyClient(discord.Client):
-    in_game_map: Dict[int, int]
+    in_game_map: Dict[int, set]
     time_map: Dict[int, time_difference.Time]
     player_map: Dict[int, list]
     sched_map: Dict[int, scheduler.Scheduler]
@@ -36,10 +36,12 @@ class MyClient(discord.Client):
         self.role_list = {}  # Map channel to role list
         self.react_map = {}  # Map channel to react message
         self.state_map = {}  # Map channel to state
-        if len(list(filter(lambda x: x.name == "WEREWOLF GAMES", self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
+        if len(list(filter(lambda x: x.name == "WEREWOLF GAMES",
+                           self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
             await self.create_category_channel('WEREWOLF GAMES')
         # TODO: Move this to database or something (also move same code in group.py)
-        for text_channel in next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if x.name == "WEREWOLF GAMES").text_channels:
+        for text_channel in next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if
+                                 x.name == "WEREWOLF GAMES").text_channels:
             await text_channel.delete()
 
         print('Logged on as', self.user)
@@ -64,7 +66,6 @@ class MyClient(discord.Client):
         # else: # Route Message to role (io -> game -> player -> role -> on_message)
         if message.channel.type == discord.ChannelType.private:
             await self.parse_player_message(message)
-
 
         # Debug
         await self.debug_commands(message)
@@ -95,7 +96,7 @@ class MyClient(discord.Client):
                 self.state_map.pop(message.channel.id)
                 return
             self.count_map[message.channel.id] = count
-            self.player_map[message.channel.id] = set(map(lambda x: x.id, await
+            self.player_map[message.channel.id] = list(map(lambda x: x.id, await
             list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].users().flatten()))
             self.player_map[message.channel.id].remove(self.user.id)
 
@@ -177,10 +178,10 @@ class MyClient(discord.Client):
         elif self.state_map[message.channel.id] == 1 and message.content == '$done' and len(
                 self.role_list[message.channel.id]) > self.count_map[message.channel.id]:
             if roles.good_roles & set(self.role_list[message.channel.id]) == set():
-                await message.channel.send('There should be at least one town alligned role')
+                await message.channel.send('There should be at least one town aligned role')
                 return
             if roles.evil_roles & set(self.role_list[message.channel.id]) == set():
-                await message.channel.send('There should be at least one evil alligend role')
+                await message.channel.send('There should be at least one evil aligned role')
                 return
 
             for player_id in self.player_map[message.channel.id]:
@@ -201,10 +202,9 @@ class MyClient(discord.Client):
             self.state_map[message.channel.id] = 2
 
         # TODO INITIALIZE GAME HERE
-        ## TODO: ENTER TIME ZONE
+        # TODO: ENTER TIME ZONE
         # self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
         # await self.game_map[message.channel.id].time_scheduler();
-
 
         elif self.state_map[message.channel.id] == 2 and message.content[:10] == '$timezone ':
             print("Debug: Entered Timezone", message.content[:10])
@@ -223,8 +223,8 @@ class MyClient(discord.Client):
             await self.sched_map[message.channel.id].initialize()
 
             await message.channel.send('The game has ended. Thank you for playing :)')
-            for player_id in self.game_map[message.channel.id].player_list:
-                self.in_game_map[player_id].pop(message.channel.id)
+            for player_id in self.game_map[message.channel.id].players_list:
+                self.in_game_map[player_id].remove(message.channel.id)
             self.state_map.pop(message.channel.id)
 
         # except:
@@ -261,12 +261,12 @@ class MyClient(discord.Client):
         if message.content == 'berlin':
             print("Debug: Start a game in Berlin")
             self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'Europe/Berlin')
-            await self.game_map[message.channel.id].time_scheduler();
+            await self.game_map[message.channel.id].time_scheduler()
 
         if message.content == 'new_york':
             print("Debug: Start a game in New York")
             self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'America/New_York')
-            await self.game_map[message.channel.id].time_scheduler();
+            await self.game_map[message.channel.id].time_scheduler()
 
     # Get information about roles or presets
     async def information_calls(self, message):
@@ -376,7 +376,7 @@ class MyClient(discord.Client):
 
 
 if not datamanager.check_json():
-    print("Error: Multiple errors have occured. Bot has not been started")
+    print("Error: Multiple errors have occurred. Bot has not been started")
     quit()
 
 client = MyClient(activity=discord.Activity(name='Write $setup to start a game', type=discord.ActivityType.custom))
