@@ -5,20 +5,23 @@ from data import datamanager
 
 class Group:
 
-    def __init__(self, client, name='text_channel'):
+    def __init__(self, client, master, name='text_channel'):
         self.client = client
         self.members = []
         self.guild = client.get_guild(datamanager.get_config('covert_server'))  # insert guild ID
         self.name = name
         self.channel = None
+        self.master = master
+        self.votes = {}
 
-    async def instantiate_channel(self):
+    async def instantiate_channel(self, game):
         category = self.client.get_channel(self.client.category_id)
         overwrites = {
             self.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             self.guild.me: discord.PermissionOverwrite(read_messages=True)
         }
         self.channel = await self.guild.create_text_channel(self.name, overwrites=overwrites, category=category)
+        self.client.group_game[self.channel.id] = game
 
     def add_user(self, user_id):
         user = self.client.get_user(user_id)

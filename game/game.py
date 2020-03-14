@@ -71,7 +71,7 @@ class Game:
         max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
         print("Debug: max_votes =", max_votes)
         print("Debug: votes =", self.votes)
-        most_voted = list(filter(lambda x: self.votes.get(x.id, 0) == max_votes, self.sort_players(only_alive=True)))
+        most_voted = list(filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
         print("Debug: most_voted =", most_voted)
 
         if len(most_voted) > 1:
@@ -109,7 +109,7 @@ class Game:
 
         max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
         print("Debug: max_votes =", max_votes)
-        most_voted = list(filter(lambda x: self.votes.get(x.id, 0) == max_votes, self.sort_players(only_alive=True)))
+        most_voted = list(filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
         print("Debug: most_voted =", most_voted)
 
         if len(most_voted) > 1:
@@ -146,21 +146,28 @@ class Game:
             await concrete_player.role.on_nightfall(self)
         await self.refresh_groups()
 
+    async def commence_postnight(self):
+        # TODO Vote stuff
+        print("Debug: Postnight has started")
+        for concrete_player in self.sort_players(only_alive=True):
+            await concrete_player.role.on_postnight(self)
+        await self.refresh_groups()
+
     #
     async def player_die(self, dead_player, murderer):
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_playerdeath(self, dead_player, murderer)
 
-    async def create_group(self, group_bind):
-        g = group.Group(self.interface, name=group_bind + "_on_" + self.interface.get_channel(
+    async def create_group(self, group_bind, master):
+        g = group.Group(self.interface, master, name=group_bind + "_on_" + self.interface.get_channel(
             self.id).guild.name + "_" + self.interface.get_channel(self.id).name)
-        await g.instantiate_channel()
+        await g.instantiate_channel(self)
         self.groups[group_bind] = g
         return g
 
     async def refresh_groups(self):
-        for concrete_group in self.groups:
-            concrete_group.refresh_members()
+        for concrete_group in self.groups.values():
+            await concrete_group.refresh_members()
 
     def sort_players(self, only_alive=False):
         players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
@@ -176,10 +183,10 @@ class Game:
     def get_player_list(self, only=True, alive=False):
         return "\n".join(map(lambda x: " ".join([str(x[0] + 1), '-', x[1].name]),
                              filter(lambda y: y[1].is_alive or not only != alive,
-                                    enumerate(map(lambda z: self.player_objs[z], self.sort_players(only_alive=False))))))
+                                    enumerate(self.sort_players(only_alive=False)))))
 
     def get_player_id_at(self, n):
-        return self.get_player_obj_at(n).id
+        return self.get_player_obj_at(n).player_id
 
     def get_player_obj_at(self, n):
         return self.sort_players(only_alive=False)[n - 1]

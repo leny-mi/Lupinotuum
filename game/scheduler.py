@@ -54,6 +54,8 @@ class Scheduler:
     async def time_scheduler(self):
 
         await self.game_obj.commence_night()
+        await self.sleep_until(23, 0)
+        await self.game_obj.commence_postnight()
 
         while True:  # Edit to end at game end
             await self.sleep_until(8, 0)
@@ -68,6 +70,8 @@ class Scheduler:
             await self.game_obj.commence_hanging()
             await self.sleep_until(20, 0)
             await self.game_obj.commence_night()
+            await self.sleep_until(23, 0)
+            await self.game_obj.commence_postnight()
 
     async def sleep_until(self, hour, minute):
         secs = self.time.seconds_until(hour, minute)

@@ -11,6 +11,7 @@ class Role:
         self.lovers = set()  # Set of this roles lovers
 
         self.vote_for = None  # Player INDEX to vote for
+        self.group_master = []
 
     async def on_private_message(self, game, message):
         print(self.player.name, ": ", message)
@@ -28,6 +29,13 @@ class Role:
             except ValueError:
                 await game.interface.game_direct(self.player.player_id,
                                                  "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
+
+    async def on_group_message(self, game, message):
+        if message == 'players':
+            print("Debug: List Players")
+            await game.interface.game_direct(self.player.player_id,
+                                             "The following players are still in the game:\n" + game.get_player_list())
+        print("In Group", message)
 
     async def on_game_start(self, game):
         pass
@@ -98,6 +106,7 @@ class Role:
         self.lovers.add(player)
 
     async def on_attacked(self, game, attacker):
+        self.player.is_alive = False
         await game.interface.game_broadcast(game.id,
                                             self.player.name + " has died because of an attack by a " + attacker.__class__.__name__.title())
 
@@ -113,15 +122,16 @@ class Role:
         if message.startswith('vote ') and flag in self.flags:
             try:
                 value = int(message.split(' ')[1])
-                if not game.get_player_obj_at(value).alive:
-                    await game.interface.game_direct(self.player.id,
+                if not game.get_player_obj_at(value).is_alive:
+                    await game.interface.game_direct(self.player.player_id,
                                                      "Chosen player is not alive. Please choose a player who is still in the game.")
                     return
                 self.vote_for = value
+                print("Debug:", self.player.name, "voted for", self.vote_for)
             except ValueError:
-                await game.interface.game_direct(self.player.id,
+                await game.interface.game_direct(self.player.player_id,
                                                  "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
             except IndexError:
-                await game.interface.game_direct(self.player.id, "Incorrect player index")
+                await game.interface.game_direct(self.player.player_id, "Incorrect player index")
 
     # def do_choose(self, game, message, flag )

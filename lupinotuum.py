@@ -25,6 +25,7 @@ class WerewolfBot(discord.Client):
     react_map: Dict[int, discord.Message]
     state_map: Dict[int, int]
     group_map: Dict[int, list]
+    group_game: Dict[int, group.Group]
     category_id: int
 
     async def on_ready(self):
@@ -39,6 +40,7 @@ class WerewolfBot(discord.Client):
         self.react_map = {}  # Map channel to react message
         self.state_map = {}  # Map channel to state
         self.group_map = {}  # Map channel to list of group
+        self.group_game = {}  # Map channel_id (group) to game
         self.category_id = None  # Category channel id to spawn groups in
 
         if len(list(filter(lambda x: x.name == "WEREWOLF GAMES",
@@ -68,6 +70,7 @@ class WerewolfBot(discord.Client):
         # Group message
         if message.channel.type == discord.ChannelType.text and message.channel.category_id == self.category_id:
             # TODO: Route to guild
+            await self.group_game[message.channel.id].player_objs[message.author.id].role.on_group_message(self.group_game[message.channel.id], message.content.split('$')[1])
             return
 
         # User starts game setup
@@ -252,7 +255,7 @@ class WerewolfBot(discord.Client):
 
         if message.content == 'create':
             print("Debug: Create secret channel")
-            self.c = group.Group(self, 'test_hi1')
+            self.c = group.Group(self, None, 'test_hi1')
             await self.c.instantiate_channel()
 
         if message.content == 'ref':

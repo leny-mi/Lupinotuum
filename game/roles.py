@@ -123,20 +123,49 @@ class Vampire(Evil):
 
 
 class Werewolf(Evil):
-    async def on_private_message(self, game, message):
-        await super().on_private_message(game, message)
+    # async def on_private_message(self, game, message):
+    #     await super().on_private_message(game, message)
+
+    async def on_group_message(self, game, message):
+        await super(Werewolf, self).on_group_message(game, message)
+        print("Debug: Got group message", message)
         await self.do_vote_action(game, message, flag=Flags.ABILITY_READY)
 
     async def on_game_start(self, game):
-        if Werewolf not in game.channels:
-            game.channels[Werewolf] = await game.create_group(Werewolf)
-        game.channels[Werewolf].add_user(self.player.player_id)
+        if self.__class__.__name__ not in game.groups:
+            game.groups[self.__class__.__name__] = await game.create_group(self.__class__.__name__, self)
+            self.group_master.append(game.groups[self.__class__.__name__])
+        game.groups[self.__class__.__name__].add_user(self.player.player_id)
 
     async def on_nightfall(self, game):
         self.flags.add(Flags.ABILITY_READY)
+        if self == game.groups[self.__class__.__name__].master:
+            game.groups[self.__class__.__name__].votes = {}
 
-    async def on_postnight(self, name):
+    async def on_postnight(self, game):
         self.flags.remove(Flags.ABILITY_READY)
+        if self.vote_for is not None:
+            if self.vote_for not in game.groups[self.__class__.__name__].votes:
+                game.groups[self.__class__.__name__].votes[game.get_player_obj_at(self.vote_for)] = 0
+            game.groups[self.__class__.__name__].votes[game.get_player_obj_at(self.vote_for)] += 1
+            self.vote_for = None
+
+    async def on_sunrise(self, game):
+        await super(Werewolf, self).on_sunrise(game)
+        if self == game.groups[self.__class__.__name__].master:
+            max_votes = max(game.groups[self.__class__.__name__].votes.values()) if len(game.groups[self.__class__.__name__].votes.values()) > 0 else 0
+            print("Debug: max_votes =", max_votes)
+            most_voted = list(
+                filter(lambda x: game.groups[self.__class__.__name__].votes.get(x, 0) == max_votes, game.sort_players(only_alive=True)))
+            print("Debug: most_voted =", most_voted)
+            # game.get_player_obj_at()
+            if len(most_voted) > 1:
+                await game.groups[self.__class__.__name__].channel.send("No majority reached.")
+            else:
+                await most_voted[0].role.on_attacked(game, self)
+
+
+
 
 
 class Witch(Evil):
