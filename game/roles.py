@@ -123,13 +123,11 @@ class Vampire(Evil):
 
 
 class Werewolf(Evil):
-    # async def on_private_message(self, game, message):
-    #     await super().on_private_message(game, message)
 
-    async def on_group_message(self, game, message):
-        await super(Werewolf, self).on_group_message(game, message)
+    async def on_group_message(self, game, channel, message):
+        await super(Werewolf, self).on_group_message(game, None, message)
         print("Debug: Got group message", message)
-        await self.do_vote_action(game, message, flag=Flags.ABILITY_READY)
+        await self.do_vote_action(game, channel, message, flag=Flags.ABILITY_READY)
 
     async def on_game_start(self, game):
         if self.__class__.__name__ not in game.groups:

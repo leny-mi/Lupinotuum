@@ -1,17 +1,14 @@
-from typing import Dict, Any
+from typing import Dict
 
 import discord
 
 from data import datamanager
-
-from usable import group
-from usable import time_difference
-from usable import utils
-
+from game import game
+from game import presets
 from game import roles
 from game import scheduler
-from game import presets
-from game import game
+from usable import time_difference
+from usable import utils
 
 
 class WerewolfBot(discord.Client):
@@ -25,15 +22,15 @@ class WerewolfBot(discord.Client):
     react_map: Dict[int, discord.Message]
     state_map: Dict[int, int]
     group_map: Dict[int, list]
-    group_game: Dict[int, group.Group]
+    group_game: Dict[int, game.Game]
     category_id: int
 
     async def on_ready(self):
 
-        self.in_game_map = {}  # Map playerid to their gameids
+        self.in_game_map = {}  # Map player_id to their game_ids
         self.time_map = {}  # Map channel to time object
         self.player_map = {}  # Map channel to player list
-        self.sched_map = {}  # Map channel to scheduler (PROBALBY NOT NEEDED AFTER DEBUG)
+        self.sched_map = {}  # Map channel to scheduler (PROBABLY NOT NEEDED AFTER DEBUG)
         self.game_map = {}  # Map channel to game
         self.count_map = {}  # Map channel to count
         self.role_list = {}  # Map channel to role list
@@ -41,11 +38,12 @@ class WerewolfBot(discord.Client):
         self.state_map = {}  # Map channel to state
         self.group_map = {}  # Map channel to list of group
         self.group_game = {}  # Map channel_id (group) to game
-        self.category_id = None  # Category channel id to spawn groups in
+        self.category_id = 0  # Category channel id to spawn groups in
 
         if len(list(filter(lambda x: x.name == "WEREWOLF GAMES",
                            self.get_guild(datamanager.get_config('covert_server')).categories))) == 0:
-            werewolf_channel = await self.create_category_channel('WEREWOLF GAMES')
+            werewolf_channel = await self.get_guild(datamanager.get_config('covert_server')).create_category_channel(
+                'WEREWOLF GAMES')
             self.category_id = werewolf_channel.id
         else:
             self.category_id = next(x for x in self.get_guild(datamanager.get_config('covert_server')).categories if
@@ -81,7 +79,7 @@ class WerewolfBot(discord.Client):
 
         # User uses $setup incorrectly
         elif message.channel.type == discord.ChannelType.text and message.content == "$setup":  # Send a message only on $setup to avoid confusion
-            await message.channel.send('Game is already running. There can only be ohne game per text channel.')
+            await message.channel.send('Game is already running. There can only be one game per text channel.')
             return
 
         # else: Route Message to role (io -> game -> player -> role -> on_message)
@@ -102,7 +100,8 @@ class WerewolfBot(discord.Client):
                 print("Debug: Setup initialized")
                 self.state_map[message.channel.id] = 0
                 self.react_map[message.channel.id] = await message.channel.send(
-                    'Setting up game. To reset, write `$reset`. If you want to participate, react with :wolf: under this message. After all players have reacted, write `$continue`')
+                    'Setting up game. To reset, write `$reset`. If you want to participate, react with :wolf: under '
+                    'this message. After all players have reacted, write `$continue`')
                 await self.react_map[message.channel.id].add_reaction('🐺')
 
         # User writes continue after reacting
@@ -112,7 +111,6 @@ class WerewolfBot(discord.Client):
             message = await message.channel.fetch_message(self.react_map[message.channel.id].id)
             count = list(filter(lambda x: x.emoji == '🐺', message.reactions))[0].count - 1
             if count < 0:  # TODO:  Enable this filter again (set on 4)
-                count = max(4, count)  # TODO:  Remove this after debug phase
                 await message.channel.send("Not enough players. There should be at least 4")
                 self.state_map.pop(message.channel.id)
                 return
@@ -123,7 +121,14 @@ class WerewolfBot(discord.Client):
 
             print("Debug: The following players are participating:", self.player_map[message.channel.id])  # DEBUG
             await message.channel.send(str(
-                count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For example `$addrole ORACLE`. There should be at least one role more than there are players. To see all roles type `$rolelist`. To remove a role type `$delrole ROLE`. To look at your current role list, type `$current`. \nTo choose a preset type `$preset PRESET` and to view all presets use `$presetlist`.\nType `$done` when you are finished or `$reset` to start over')
+                count) + " players have entered.\n" + 'Add roles to the role list by typing `$addrole ROLE`. For '
+                                                      'example `$addrole ORACLE`. There should be at least one role '
+                                                      'more than there are players. To see all roles type '
+                                                      '`$rolelist`. To remove a role type `$delrole ROLE`. To look at '
+                                                      'your current role list, type `$current`. \nTo choose a preset '
+                                                      'type `$preset PRESET` and to view all presets use '
+                                                      '`$presetlist`.\nType `$done` when you are finished or `$reset` '
+                                                      'to start over')
 
         # Set a preset
         elif self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset ':
@@ -133,18 +138,18 @@ class WerewolfBot(discord.Client):
 
         # Get all presets
         elif self.state_map[message.channel.id] == 1 and message.content == '$presetlist':
-            tmessage = 'There are the following presets: ```'
+            presets_message = 'There are the following presets: ```'
             for preset in presets.Preset:
-                tmessage += "\n - " + preset.name
+                presets_message += "\n - " + preset.name
             await message.channel.send(
-                tmessage + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
+                presets_message + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
 
         # Get a certain preset
         elif self.state_map[message.channel.id] == 1 and message.content[:12] == '$presetinfo ':
-            tmessage = 'Preset ' + message.content[12:] + ' contains: ```'
+            presets_message = 'Preset ' + message.content[12:] + ' contains: ```'
             for role in presets.Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
-                tmessage += "\n - " + role.__name__
-            await message.channel.send(tmessage + "```")
+                presets_message += "\n - " + role.__name__
+            await message.channel.send(presets_message + "```")
 
         # User writes $reset before completing setup
         elif self.state_map[message.channel.id] <= 1 and message.content == '$reset':
@@ -159,7 +164,7 @@ class WerewolfBot(discord.Client):
                 await message.channel.send('Invalid role. Use `$list` to see all roles')
                 return
 
-            if not message.channel.id in self.role_list:
+            if message.channel.id not in self.role_list:
                 self.role_list[message.channel.id] = []
             self.role_list[message.channel.id].append(role)
             await message.channel.send('Added ' + message.content[9:].title() + ' to role list')
@@ -172,7 +177,7 @@ class WerewolfBot(discord.Client):
                 await message.channel.send('Invalid role. Use `$current` to see the role list')
                 return
 
-            if not message.channel.id in self.role_list:
+            if message.channel.id not in self.role_list:
                 self.role_list[message.channel.id] = []
             if role not in self.role_list[message.channel.id]:
                 await message.channel.send(message.content[9:].title() + ' not in role list')
@@ -182,7 +187,7 @@ class WerewolfBot(discord.Client):
 
         # User removes a role using '$current ...'
         elif self.state_map[message.channel.id] == 1 and message.content == '$current':
-            if not message.channel.id in self.role_list or len(self.role_list[message.channel.id]) == 0:
+            if message.channel.id not in self.role_list or len(self.role_list[message.channel.id]) == 0:
                 await message.channel.send('Role list is empty.')
                 return
             await message.channel.send('The following roles are in the role list:' + utils.format_role_list(
@@ -218,7 +223,9 @@ class WerewolfBot(discord.Client):
                 'invite_link') + ' for private communications\nGame with ID ' + str(
                 message.channel.id) + ' will start at INSERT TIME on INSERT DATE')
             await message.channel.send(
-                'Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
+                'Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, '
+                'America/New_York, Asia/Dubai. For a list of all accepted timezones visit '
+                'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
 
             self.state_map[message.channel.id] = 2
 
@@ -254,40 +261,9 @@ class WerewolfBot(discord.Client):
     # Debug stuff
     async def debug_commands(self, message):
 
-        if message.content == 'create':
-            print("Debug: Create secret channel")
-            self.c = group.Group(self, None, 'test_hi1')
-            await self.c.instantiate_channel()
-
-        if message.content == 'ref':
-            print("Debug: Refresh secret channel")
-            await self.c.refresh_members()
-
-        if message.content == 'add':
-            print("Debug: Add player to secret channel")
-            self.c.add_user(298488132255350784)
-
-        if message.content == 'remove':
-            print("Debug: Remove player from secret channel")
-            self.c.remove_user(298488132255350784)
-
-        if message.content == 'del':
-            print("Debug: Delete secret channel")
-            await self.c.delete_channel()
-
         if message.content == '.next':
             print("Debug: Skip to next event")
             self.sched_map[message.channel.id].debug = 1
-
-        if message.content == 'berlin':
-            print("Debug: Start a game in Berlin")
-            self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'Europe/Berlin')
-            await self.game_map[message.channel.id].time_scheduler()
-
-        if message.content == 'new_york':
-            print("Debug: Start a game in New York")
-            self.game_map[message.channel.id] = game.Game(self, None, message.channel.id, None, 'America/New_York')
-            await self.game_map[message.channel.id].time_scheduler()
 
     # Get information about roles or presets
     async def information_calls(self, message):
@@ -295,11 +271,11 @@ class WerewolfBot(discord.Client):
         if message.content == '$rolelist':
             print("Debug: List all roles")
             role_list_message_content = 'The following roles exist'
-            role_list_message_content += "\n\nTown alligned roles:```"
+            role_list_message_content += "\n\nTown aligned roles:```"
             role_list_message_content += "\n - ".join(map(lambda x: x.__name__, roles.good_roles))
-            role_list_message_content += "```\nEvil alligned roles: ```"
+            role_list_message_content += "```\nEvil aligned roles: ```"
             role_list_message_content += "\n - ".join(map(lambda x: x.__name__, roles.evil_roles))
-            role_list_message_content += "```\nNeutral alligned roles: ```"
+            role_list_message_content += "```\nNeutral aligned roles: ```"
             role_list_message_content += "\n - ".join(map(lambda x: x.__name__, roles.neutral_roles))
 
             await message.channel.send(role_list_message_content + "```")
@@ -316,7 +292,6 @@ class WerewolfBot(discord.Client):
                 await message.channel.send('No role description available :(')
                 return True
             stats = data[message.content[6:].upper()]
-            # color = (10066176 if role.value == -1 else (color = 52224 if role.value < 100 else (7829367 if role.value >= 200 else 16711680)))
             if message.content[6:].lower() == 'narrator':
                 color = 10066176
             elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), roles.good_roles)):
@@ -355,19 +330,32 @@ class WerewolfBot(discord.Client):
         print("Debug: Message parsed")
         if message.content.startswith('$') and len(self.in_game_map[message.author.id]) > 1:
             await message.channel.send(
-                "You are in multiple games. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+                "You are in multiple games. Please specify the game you are referring to by prepending it to your "
+                "command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` "
+                "instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. "
+                "If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but "
+                "not `12$info Villager`. \nTo view a list of your games use `$games`. ")
             return
 
         games = list(
             filter(lambda x: str(x).startswith(message.content.split('$')[0]), self.in_game_map[message.author.id]))
         if len(games) > 1:
             await message.channel.send(
-                "You are in multiple games. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+                "You are in multiple games. Please specify the game you are referring to by prepending it to your "
+                "command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` "
+                "instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. "
+                "If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but "
+                "not `12$info Villager`. \nTo view a list of your games use `$games`. ")
             return
 
         if len(games) < 1:
             await message.channel.send(
-                "Either none of your games match your ID or they have not yet started. Please specify the game you are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use `$games`. ")
+                "Either none of your games match your ID or they have not yet started. Please specify the game you "
+                "are referring to by prepending it to your command. \nIf your game ID were 123456789 for example, "
+                "you might write `123456789$info Villager` instead of `$info Villager`. You may use only a first part "
+                "of your game ID as long as it's unique. If you had two games with the IDs 123456789 and 124567899, "
+                "you might write `123$info Villager` but not `12$info Villager`. \nTo view a list of your games use "
+                "`$games`. ")
             return
 
         if message.author.id not in self.game_map[games[0]].player_objs:

@@ -174,6 +174,11 @@ class Game:
         players.sort(key=lambda x: roles.role_order.index(x.role.__class__))
         return list(filter(lambda x: not only_alive or x.is_alive, players))
 
+    def consistent_player_list(self, only_alive=False):
+        players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
+        players.sort(key=lambda x: x.player_id)
+        return list(filter(lambda x: not only_alive or x.is_alive, players))
+
     def add_vote(self, player_id, vote_count):
         if player_id not in self.votes:
             self.votes[player_id] = vote_count
@@ -183,7 +188,7 @@ class Game:
     def get_player_list(self, only=True, alive=False):
         return "\n".join(map(lambda x: " ".join([str(x[0] + 1), '-', x[1].name]),
                              filter(lambda y: y[1].is_alive or not only != alive,
-                                    enumerate(self.sort_players(only_alive=False)))))
+                                    enumerate(self.consistent_player_list(only_alive=False)))))
 
     def get_player_id_at(self, n):
         return self.get_player_obj_at(n).player_id
