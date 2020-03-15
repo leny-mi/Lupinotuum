@@ -33,14 +33,20 @@ class Guardian_Angel(Good):
     async def on_nightfall(self, game):
         await super(Guardian_Angel, self).on_nightfall(game)
         self.flags.add(Flags.ABILITY_READY)
-        await game.interface.game_direct(self.player.player_id, "You can use your ability until " + game.time.get_next_time_string(23, 0) + ".")
+        await game.interface.game_direct(self.player.player_id,
+                                         "You can use your ability until " + game.time.get_next_time_string(23,
+                                                                                                            0) + ".")
 
     async def on_postnight(self, game):
         await super(Guardian_Angel, self).on_postnight(game)
         self.flags.remove(Flags.ABILITY_READY)
-        player_to_guard = game.get_player_obj_at(self.guarded)
-        player_to_guard.role.flags.add(Flags.GUARDED)
-        player_to_guard.role.guarded_from = self.player
+        try:
+            if self.guarded is not None:
+                player_to_guard = game.get_player_obj_at(self.guarded)
+                player_to_guard.role.flags.add(Flags.GUARDED)
+                player_to_guard.role.guarded_from = self.player
+        except:
+            pass
 
 
 class Villager(Good):
@@ -69,17 +75,23 @@ class Seer(Good):
     async def on_nightfall(self, game):
         await super(Seer, self).on_nightfall(game)
         self.flags.add(Flags.ABILITY_READY)
-        await game.interface.game_direct(self.player.player_id, "You can use your ability until " + game.time.get_next_time_string(23, 0) + ".")
+        await game.interface.game_direct(self.player.player_id,
+                                         "You can use your ability until " + game.time.get_next_time_string(23,
+                                                                                                            0) + ".")
 
     async def on_postnight(self, game):
         await super(Seer, self).on_postnight(game)
-        self.flags.remove(Flags.ABILITY_READY)
+        self.flags.discard(Flags.ABILITY_READY)
 
     async def on_sunrise(self, game):
         await super(Seer, self).on_sunrise(game)
-        if self.see_player is not None:
-            await game.interface.game_direct(self.player.player_id, self.see_player.name + '\'s alignment is ' + str(
-                self.see_player.role.alive_alignment))
+        try:
+            if self.see_player is not None:
+                await game.interface.game_direct(self.player.player_id,
+                                                 self.see_player.name + '\'s alignment is ' + str(
+                                                     self.see_player.role.alive_alignment))
+        except:
+            pass
 
 
 class Resurrectionist(Good):
@@ -111,7 +123,43 @@ class Knight(Good):
 
 
 class Cupid(Good):
-    pass
+    player1: player.Player
+    player2: player.Player
+
+    async def on_private_message(self, game, channel, message: str):
+        await super(Cupid, self).on_private_message(game, channel, message)
+        if message.split(' ')[0] == 'pair':
+            try:
+                assert (len(message.split(' ')) == 3)
+                if not game.get_player_obj_at(int(message.split(' ')[1])).is_alive:
+                    await channel.send("Chosen first player is not alive.")
+                elif not game.get_player_obj_at(int(message.split(' ')[2])).is_alive:
+                    await channel.send("Chosen second player is not alive.")
+                else:
+                    self.player1 = game.get_player_obj_at(int(message.split(' ')[1]))
+                    self.player2 = game.get_player_obj_at(int(message.split(' ')[2]))
+                    await channel.send(
+                        'You chose to make ' + self.player1.name + ' and ' + self.player2.name + ' fall in love.')
+            except:
+                await channel.send("Incorrect command usage. Use `$info Cupid` to see an explanation.")
+
+    async def on_game_start(self, game):
+        await super(Cupid, self).on_game_start(game)
+        await game.interface.game_direct(self.player.player_id,
+                                         "You may choose two players using `pair PLAYER1 PLAYER2` until " + game.time.get_next_time_string(
+                                             23, 0) + '.')
+        self.flags.add(Flags.ABILITY_READY)
+
+    async def on_postnight(self, game):
+        await super(Cupid, self).on_postnight(game)
+        if Flags.ABILITY_READY in self.flags:
+            try:
+                if self.player1 is not None and self.player2 is not None:
+                    self.player1.role.lovers.add(self.player2)
+                    self.player2.role.lovers.add(self.player1)
+            except:
+                pass
+        self.flags.discard(Flags.ABILITY_READY)
 
 
 class Brother(Good):

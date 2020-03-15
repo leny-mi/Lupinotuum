@@ -88,7 +88,7 @@ class Role:
         if player in self.lovers:
             await game.interface.game_broadcast(game.id,
                                                 self.player.name + " died because of their love to " + player.name)
-
+            self.player.is_alive = False
             await game.player_die(self.player, None)
 
     async def on_resurrect(self, game):
