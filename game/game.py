@@ -167,9 +167,9 @@ class Game:
             assert(last_alignment == concrete_player.role.alive_alignment)
 
         winners = list(filter(lambda x: x.role.early_win or x.role.alive_alignment == last_alignment, self.consistent_player_list(only_alive=True)))
-        await self.interface.game_broadcast(self.id, " and ".join(
+        await self.interface.game_broadcast(self.id, ((" and ".join(
                 [", ".join(list(map(lambda x: x.name, winners[:-1]))),
-                 winners[-1].name]) + " won the game.")
+                 winners[-1].name])) if len(winners) > 1 else winners[0].name if len(winners) == 1 else "Nobody") + " won the game.")
 
         # TODO: Maybe broadcast role list
 

@@ -12,7 +12,7 @@ class Group:
         self.name = name
         self.channel = None
         self.master = master
-        self.votes = {}
+        self.votes = {}  # Dict of votes
 
     async def instantiate_channel(self, game):
         category = self.client.get_channel(self.client.category_id)

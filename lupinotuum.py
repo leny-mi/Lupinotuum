@@ -262,6 +262,11 @@ class WerewolfBot(discord.Client):
             for player_id in self.game_map[message.channel.id].players_list:
                 self.in_game_map[player_id].remove(message.channel.id)
 
+            for group in self.game_map[message.channel.id].groups:
+                group.delete_channel()
+
+            self.role_list.pop(message.channel.id)
+
             await self.game_broadcast(message.channel.id, "The game has ended. Use `$setup` to start another game")
             self.state_map.pop(message.channel.id)
 

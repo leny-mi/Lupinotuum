@@ -48,7 +48,7 @@ class Role:
         pass
 
     async def on_sunrise(self, game):
-        pass
+        self.flags.discard(Flags.INHIBITED)
 
     async def on_votestart(self, game):
         self.flags.add(Flags.VOTE_READY)
@@ -80,11 +80,12 @@ class Role:
             else:
                 await game.interface.game_broadcast(game.id,
                                                     self.player.name + " has been hanged. They have been a " + self.player.role.__class__.__name__.title())
-                self.player.is_alive = False
                 await game.player_die(self.player, None)
 
     async def on_playerdeath(self, game, player, murderer):
         # game.players_alive.remove(player)
+        if self.player == player:
+            self.player.is_alive = False
         if player in self.lovers:
             await game.interface.game_broadcast(game.id,
                                                 self.player.name + " died because of their love to " + player.name)
@@ -106,14 +107,18 @@ class Role:
     async def on_inlove(self, game, player):
         self.lovers.add(player)
 
-    async def on_attacked(self, game, attacker):
+    async def on_attacked(self, game, attacker, anonymous=True):
         if Flags.GUARDED in self.flags:
             await game.interface.game_direct(self.player.player_id, "You have been attacked but someone guarded you.")
             await game.interface.game_direct(self.guarded_from.player_id, self.guarded_from)
         else:
-            self.player.is_alive = False
-            await game.interface.game_broadcast(game.id,
-                                                self.player.name + " has died because of an attack by a " + attacker.__class__.__name__.title())
+            if anonymous:
+                await game.interface.game_broadcast(game.id,
+                                                self.player.name + " has died because of an attack by a " + attacker.__class__.__name__.title() + ".")
+            else:
+                await game.interface.game_broadcast(game.id,
+                                                    self.player.name + " has died because of an attack by " + attacker.player.name + ", a " + attacker.__class__.__name__.title() + ".")
+            await game.player_die(self.player, attacker)
 
     async def on_guard(self, game):
         # TODO: you have been guarded
@@ -142,5 +147,20 @@ class Role:
                     'for example.')
             except IndexError:
                 await game.interface.game_direct(self.player.player_id, "Incorrect player index.")
+
+    async def do_player_choice(self, game, channel, message, arg_count, max_args):
+        assert arg_count < max_args
+        if len(message.split(' ')) != max_args:
+            await channel.send("Invalid number of arguments. There should be " + str(max_args) + " but there are " + str(len(message.split(' '))))
+        else:
+            try:
+                arg_n = int(message.split(' ')[arg_count])
+                try:
+                    return game.get_player_obj_at(arg_n)
+                except:
+                    await channel.send("Invalid command usage. You can use `$info ROLE` to find out how to use a role")
+            except:
+                await channel.send("Argument should be number but was " + message.split(' ')[arg_count])
+        return None
 
     # def do_choose(self, game, message, flag )
