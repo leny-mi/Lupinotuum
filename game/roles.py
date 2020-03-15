@@ -1,5 +1,6 @@
 from game import role
 from game.flags import Flags
+from game import player
 
 
 # Good Roles
@@ -14,7 +15,32 @@ class Hunter(Good):
 
 
 class Guardian_Angel(Good):
-    pass
+    guarded: int
+
+    async def on_private_message(self, game, channel, message: str):
+        await super(Guardian_Angel, self).on_private_message(game, channel, message)
+        if message.split(' ')[0] == 'guard':
+            try:
+
+                if game.get_player_obj_at(int(message.split(' ')[1])).is_alive:
+                    self.guarded = int(message.split(' ')[1])
+                    await channel.send('You chose to guard ' + game.get_player_obj_at(int(message.split(' ')[1])).name)
+                else:
+                    await channel.send("Chosen player is not alive.")
+            except:
+                await channel.send("Incorrect command usage. Use `$info Guardian_Angel` to see an explanation.")
+
+    async def on_nightfall(self, game):
+        await super(Guardian_Angel, self).on_nightfall(game)
+        self.flags.add(Flags.ABILITY_READY)
+        await game.interface.game_direct(self.player.player_id, "You can use your ability until " + game.time.get_next_time_string(23, 0) + ".")
+
+    async def on_postnight(self, game):
+        await super(Guardian_Angel, self).on_postnight(game)
+        self.flags.remove(Flags.ABILITY_READY)
+        player_to_guard = game.get_player_obj_at(self.guarded)
+        player_to_guard.role.flags.add(Flags.GUARDED)
+        player_to_guard.role.guarded_from = self.player
 
 
 class Villager(Good):
@@ -26,7 +52,34 @@ class Vigilante(Good):
 
 
 class Seer(Good):
-    pass
+    see_player: player.Player
+
+    async def on_private_message(self, game, channel, message: str):
+        await super(Seer, self).on_private_message(game, channel, message)
+        if message.split(' ')[0] == 'see':
+            try:
+                if game.get_player_obj_at(int(message.split(' ')[1])).is_alive:
+                    self.see_player = game.get_player_obj_at(int(message.split(' ')[1]))
+                    await channel.send('You chose to look at ' + self.see_player.name + '\'s alignment.')
+                else:
+                    await channel.send("Chosen player is not alive.")
+            except:
+                await channel.send("Incorrect command usage. Use `$info Seer` to see an explanation.")
+
+    async def on_nightfall(self, game):
+        await super(Seer, self).on_nightfall(game)
+        self.flags.add(Flags.ABILITY_READY)
+        await game.interface.game_direct(self.player.player_id, "You can use your ability until " + game.time.get_next_time_string(23, 0) + ".")
+
+    async def on_postnight(self, game):
+        await super(Seer, self).on_postnight(game)
+        self.flags.remove(Flags.ABILITY_READY)
+
+    async def on_sunrise(self, game):
+        await super(Seer, self).on_sunrise(game)
+        if self.see_player is not None:
+            await game.interface.game_direct(self.player.player_id, self.see_player.name + '\'s alignment is ' + str(
+                self.see_player.role.alive_alignment))
 
 
 class Resurrectionist(Good):
@@ -124,7 +177,6 @@ class Vampire(Evil):
 
 
 class Werewolf(Evil):
-
     alive_alignment = "Werewolf"
 
     async def on_group_message(self, game, channel, message):
@@ -133,21 +185,25 @@ class Werewolf(Evil):
         await self.do_vote_action(game, channel, message, flag=Flags.ABILITY_READY)
 
     async def on_game_start(self, game):
+        await super(Werewolf, self).on_game_start(game)
         if self.__class__.__name__ not in game.groups:
             game.groups[self.__class__.__name__] = await game.create_group(self.__class__.__name__, self)
             self.group_master.append(game.groups[self.__class__.__name__])
         game.groups[self.__class__.__name__].add_user(self.player.player_id)
 
     async def on_nightfall(self, game):
+        await super(Werewolf, self).on_nightfall(game)
         self.flags.add(Flags.ABILITY_READY)
         if self == game.groups[self.__class__.__name__].master:
             game.groups[self.__class__.__name__].votes = {}
-            await game.groups[self.__class__.__name__].channel.send("The night has started. You may vote on a target using "
-                                                              "`$vote PLAYER`. Use `$players` to get a list of all "
-                                                              "living players. Vote by " +
-                                                              game.time.get_next_time_string(23, 0))
+            await game.groups[self.__class__.__name__].channel.send(
+                "The night has started. You may vote on a target using "
+                "`$vote PLAYER`. Use `$players` to get a list of all "
+                "living players. Vote by " +
+                game.time.get_next_time_string(23, 0))
 
     async def on_postnight(self, game):
+        await super(Werewolf, self).on_postnight(game)
         self.flags.remove(Flags.ABILITY_READY)
         if self.vote_for is not None:
             if self.vote_for not in game.groups[self.__class__.__name__].votes:
@@ -158,19 +214,18 @@ class Werewolf(Evil):
     async def on_sunrise(self, game):
         await super(Werewolf, self).on_sunrise(game)
         if self == game.groups[self.__class__.__name__].master:
-            max_votes = max(game.groups[self.__class__.__name__].votes.values()) if len(game.groups[self.__class__.__name__].votes.values()) > 0 else 0
+            max_votes = max(game.groups[self.__class__.__name__].votes.values()) if len(
+                game.groups[self.__class__.__name__].votes.values()) > 0 else 0
             print("Debug: max_votes =", max_votes)
             most_voted = list(
-                filter(lambda x: game.groups[self.__class__.__name__].votes.get(x, 0) == max_votes, game.sort_players(only_alive=True)))
+                filter(lambda x: game.groups[self.__class__.__name__].votes.get(x, 0) == max_votes,
+                       game.sort_players(only_alive=True)))
             print("Debug: most_voted =", most_voted)
             # game.get_player_obj_at()
             if len(most_voted) > 1:
                 await game.groups[self.__class__.__name__].channel.send("No majority reached.")
             else:
                 await most_voted[0].role.on_attacked(game, self)
-
-
-
 
 
 class Witch(Evil):

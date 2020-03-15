@@ -11,13 +11,16 @@ class Role:
         self.lovers = set()  # Set of this roles lovers
 
         self.vote_for = None  # Player INDEX to vote for
-        self.group_master = []
-        self.early_win = False
+        self.group_master = []  # Groups this player is the master of
+        self.early_win = False  # True is role has won
+
+        self.guarded_from = None  # Plays this role has been guarded by
 
     async def on_private_message(self, game, channel, message):
         print(self.player.name, ": ", message)
 
-        if message == 'players':
+        if message in ('p', 'players'):
+
             print("Debug: List Players")
             await game.interface.game_direct(self.player.player_id,
                                              "The following players are still in the game:\n" + game.get_player_list())
@@ -25,18 +28,21 @@ class Role:
         await self.do_vote_action(game, channel, message, flag=Flags.VOTE_READY)
 
     async def on_group_message(self, game, channel, message):
-        if message == 'players':
+        if message in ('p', 'players'):
             print("Debug: List Players")
             await channel.send("The following players are still in the game:\n" + game.get_player_list())
-            #await game.interface.game_direct(self.player.player_id,
-             #                                "The following players are still in the game:\n" + game.get_player_list())
+            # await game.interface.game_direct(self.player.player_id,
+            #                                "The following players are still in the game:\n" + game.get_player_list())
         print("In Group", message)
 
     async def on_game_start(self, game):
-        pass
+        await game.interface.game_direct(self.player.player_id, "Game#" + game.get_game_name() + ":\nRoles have been "
+                                                                                                 "distributed. You "
+                                                                                                 "are a " +
+                                         self.__class__.__name__)
 
     async def on_nightfall(self, game):
-        pass
+        self.flags.discard(Flags.GUARDED)
 
     async def on_postnight(self, game):
         pass
@@ -48,7 +54,7 @@ class Role:
         self.flags.add(Flags.VOTE_READY)
 
     async def on_voteend(self, game):
-        self.flags.remove(Flags.VOTE_READY)
+        self.flags.discard(Flags.VOTE_READY)
         if self.vote_for is not None:
             game.add_vote(game.get_player_id_at(self.vote_for), 1)
             self.vote_for = None
@@ -101,9 +107,13 @@ class Role:
         self.lovers.add(player)
 
     async def on_attacked(self, game, attacker):
-        self.player.is_alive = False
-        await game.interface.game_broadcast(game.id,
-                                            self.player.name + " has died because of an attack by a " + attacker.__class__.__name__.title())
+        if Flags.GUARDED in self.flags:
+            await game.interface.game_direct(self.player.player_id, "You have been attacked but someone guarded you.")
+            await game.interface.game_direct(self.guarded_from.player_id, self.guarded_from)
+        else:
+            self.player.is_alive = False
+            await game.interface.game_broadcast(game.id,
+                                                self.player.name + " has died because of an attack by a " + attacker.__class__.__name__.title())
 
     async def on_guard(self, game):
         # TODO: you have been guarded

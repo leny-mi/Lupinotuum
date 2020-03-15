@@ -58,7 +58,7 @@ class Game:
         # TODO Vote stuff
         print("Debug: Vote has started")
         self.votes = {}
-        await self.interface.game_broadcast(self.id, "Vote has started")
+        await self.interface.game_broadcast(self.id, "The voting has started. You may vote for a player using `$vote PLAYER` (Example: `$vote 3`). You can see a list of all players using `$players`.")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_votestart(self)
         return await self.phase_end()
@@ -144,8 +144,8 @@ class Game:
 
     async def commence_night(self):
         # TODO Night stuff
-        print("Debug: Night has started")
-        await self.interface.game_broadcast(self.id, "Night has started")
+        print("Debug: Night", self.day_n - 1, "has started")
+        await self.interface.game_broadcast(self.id, "Night " + str(self.day_n - 1)  + " has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_nightfall(self)
         return await self.phase_end()
@@ -231,3 +231,6 @@ class Game:
 
     def get_player_obj_at(self, n):
         return self.consistent_player_list(only_alive=False)[n - 1]
+
+    def get_game_name(self):
+        return str(self.id) + " on " + self.interface.get_channel(self.id).guild.name + "/" + self.interface.get_channel(self.id).name

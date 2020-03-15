@@ -74,17 +74,17 @@ class WerewolfBot(discord.Client):
 
         # User starts game setup
         if message.channel.type == discord.ChannelType.text and (
-                message.channel.id not in self.state_map or self.state_map[message.channel.id] < 3):
+                message.channel.id not in self.state_map or self.state_map[message.channel.id] < 2):
             await self.setup(message)
 
         # User uses $setup incorrectly
-        elif message.channel.type == discord.ChannelType.text and message.content == "$setup":  # Send a message only on $setup to avoid confusion
+        elif message.channel.type == discord.ChannelType.text and message.content in ["$s",
+                                                                                      "$setup"]:  # Send a message only on $setup to avoid confusion
             await message.channel.send('Game is already running. There can only be one game per text channel.')
             return
 
         elif message.channel.type == discord.ChannelType.text:  # Send a message only on $setup to avoid confusion
-            # TODO: Global Calls
-            pass
+            await self.global_calls(message)
 
         # else: Route Message to role (io -> game -> player -> role -> on_message)
         if message.channel.type == discord.ChannelType.private:
@@ -99,7 +99,7 @@ class WerewolfBot(discord.Client):
 
         # User writes $setup, game to be started
         if message.channel.id not in self.state_map:
-            if message.content == "$setup":
+            if message.content in ["$s", "$setup"]:
                 # TODO SETUP
                 print("Debug: Setup initialized")
                 self.state_map[message.channel.id] = 0
@@ -109,7 +109,7 @@ class WerewolfBot(discord.Client):
                 await self.react_map[message.channel.id].add_reaction('🐺')
 
         # User writes continue after reacting
-        elif self.state_map[message.channel.id] == 0 and message.content == '$continue':
+        elif self.state_map[message.channel.id] == 0 and message.content in ('$c', '$continue'):
             print("Debug: Continue has been called")
             self.state_map[message.channel.id] = 1
             message = await message.channel.fetch_message(self.react_map[message.channel.id].id)
@@ -132,16 +132,21 @@ class WerewolfBot(discord.Client):
                                                       'your current role list, type `$current`. \nTo choose a preset '
                                                       'type `$preset PRESET` and to view all presets use '
                                                       '`$presetlist`.\nType `$done` when you are finished or `$reset` '
-                                                      'to start over')
+                                                      'to start over\nEnter your timezone using `$timezone TIMEZONE` '
+                                                      '(default is UTC). Common timezones may be UTC, CET, '
+                                                      'Europe/Berlin, America/New_York, Asia/Dubai. For a list of all '
+                                                      'accepted timezones visit '
+                                                      'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones '
+                                                      'and search the third column.')
 
         # Set a preset
-        elif self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset ':
-            self.role_list[message.channel.id] = presets.get_preset(message.content[8:],
+        elif self.state_map[message.channel.id] == 1 and message.content.split(' ')[0] in ('$p', '$preset'):
+            self.role_list[message.channel.id] = presets.get_preset(message.content.split(' ')[1],
                                                                     self.count_map[message.channel.id] + 1)
-            await message.channel.send("Set preset to " + message.content[8:])
+            await message.channel.send("Set preset to " + message.content.split(' ')[1])
 
         # Get all presets
-        elif self.state_map[message.channel.id] == 1 and message.content == '$presetlist':
+        elif self.state_map[message.channel.id] == 1 and message.content in ['$pl', '$presetlist']:
             presets_message = 'There are the following presets: ```'
             for preset in presets.Preset:
                 presets_message += "\n - " + preset.name
@@ -149,20 +154,21 @@ class WerewolfBot(discord.Client):
                 presets_message + "``` Use `$presetinfo PRESET` to get a list of roles for the given preset")
 
         # Get a certain preset
-        elif self.state_map[message.channel.id] == 1 and message.content[:12] == '$presetinfo ':
-            presets_message = 'Preset ' + message.content[12:] + ' contains: ```'
-            for role in presets.Preset.get_preset(message.content[12:], self.count_map[message.channel.id] + 1):
+        elif self.state_map[message.channel.id] == 1 and message.content.split(' ')[0] in ['$pi', '$presetinfo']:
+            presets_message = 'Preset ' + message.content.split(' ')[1] + ' contains: ```'
+            for role in presets.Preset.get_preset(message.content.split(' ')[1],
+                                                  self.count_map[message.channel.id] + 1):
                 presets_message += "\n - " + role.__name__
             await message.channel.send(presets_message + "```")
 
         # User writes $reset before completing setup
-        elif self.state_map[message.channel.id] <= 1 and message.content == '$reset':
+        elif self.state_map[message.channel.id] <= 1 and message.content in ['$r', '$reset']:
             self.state_map.pop(message.channel.id)
             await message.channel.send("Game has been cancelled. Type $setup to start a new game.")
 
         # User adds a role using '$addrole ...'
-        elif self.state_map[message.channel.id] == 1 and message.content[0:9] == '$addrole ':
-            role = next(obj for obj in roles.all_roles if obj.__name__.lower() == message.content[9:].lower())
+        elif self.state_map[message.channel.id] == 1 and message.content.split(' ')[0] in ['$ar', '$addrole']:
+            role = next(obj for obj in roles.all_roles if obj.__name__.lower() == message.content.split(' ')[1].lower())
             # role = Roles.get_role(message.content[9:])
             if role is None:
                 await message.channel.send('Invalid role. Use `$list` to see all roles')
@@ -171,11 +177,11 @@ class WerewolfBot(discord.Client):
             if message.channel.id not in self.role_list:
                 self.role_list[message.channel.id] = []
             self.role_list[message.channel.id].append(role)
-            await message.channel.send('Added ' + message.content[9:].title() + ' to role list')
+            await message.channel.send('Added ' + message.content.split(' ')[1].title() + ' to role list')
 
         # User removes a role using '$delrole ...'
-        elif self.state_map[message.channel.id] == 1 and message.content[0:9] == '$delrole ':
-            role = next(obj for obj in roles.all_roles if obj.__name__.lower() == message.content[9:].lower())
+        elif self.state_map[message.channel.id] == 1 and message.content.split(' ')[0] in ['$dr', '$delrole ']:
+            role = next(obj for obj in roles.all_roles if obj.__name__.lower() == message.content.split(' ')[1].lower())
             # role = Roles.get_role(message.content[9:])
             if role is None:
                 await message.channel.send('Invalid role. Use `$current` to see the role list')
@@ -184,28 +190,39 @@ class WerewolfBot(discord.Client):
             if message.channel.id not in self.role_list:
                 self.role_list[message.channel.id] = []
             if role not in self.role_list[message.channel.id]:
-                await message.channel.send(message.content[9:].title() + ' not in role list')
+                await message.channel.send(message.content.split(' ')[1].title() + ' not in role list')
                 return
             self.role_list[message.channel.id].remove(role)
-            await message.channel.send('Removed ' + message.content[9:].title() + ' from role list')
+            await message.channel.send('Removed ' + message.content.split(' ')[1].title() + ' from role list')
 
-        # User removes a role using '$current ...'
-        elif self.state_map[message.channel.id] == 1 and message.content == '$current':
+        # User removes a role using '$current'
+        elif self.state_map[message.channel.id] == 1 and message.content in ['$cr', '$current']:
             if message.channel.id not in self.role_list or len(self.role_list[message.channel.id]) == 0:
                 await message.channel.send('Role list is empty.')
                 return
             await message.channel.send('The following roles are in the role list:' + utils.format_role_list(
                 self.role_list[message.channel.id]))
 
+        # User sets timezone using 'timezone ...'
+        elif self.state_map[message.channel.id] == 1 and message.content.split(' ')[0] in ['$tz', '$timezone ']:
+            print("Debug: Entered Timezone", message.content.split(' ')[1])
+            import pytz
+            try:
+                self.time_map[message.channel.id] = time_difference.Time(message.content.split(' ')[1])
+                await message.channel.send(
+                    "Entered timezone " + message.content.split(' ')[1] + ".")
+            except pytz.exceptions.UnknownTimeZoneError:
+                await message.channel.send(
+                    "Invalid timezone. Visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of all valid timezones (Enter the TZ database name).")
         # User writes $done before adding enough roles
-        elif self.state_map[message.channel.id] == 1 and message.content == '$done' and (
+        elif self.state_map[message.channel.id] == 1 and message.content in ['$d', '$done'] and (
                 message.channel.id not in self.role_list or len(self.role_list[message.channel.id]) <= self.count_map[
             message.channel.id]):
             await message.channel.send('There are not enough roles. There should be at least ' + str(
                 self.count_map[message.channel.id] + 1) + ' roles.')
 
         # User writes $done after adding enough roles
-        elif self.state_map[message.channel.id] == 1 and message.content == '$done' and len(
+        elif self.state_map[message.channel.id] == 1 and message.content in ['$d', '$done'] and len(
                 self.role_list[message.channel.id]) > self.count_map[message.channel.id]:
             if roles.good_roles & set(self.role_list[message.channel.id]) == set():
                 await message.channel.send('There should be at least one town aligned role')
@@ -226,22 +243,9 @@ class WerewolfBot(discord.Client):
             await message.channel.send('Please join https://discord.gg/' + datamanager.get_config(
                 'invite_link') + ' for private communications\nGame with ID ' + str(
                 message.channel.id) + ' will start at INSERT TIME on INSERT DATE')
-            await message.channel.send(
-                'Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, '
-                'America/New_York, Asia/Dubai. For a list of all accepted timezones visit '
-                'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
 
-            self.state_map[message.channel.id] = 2
-
-        # TODO INITIALIZE GAME HERE
-        # TODO: ENTER TIME ZONE
-        # self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
-        # await self.game_map[message.channel.id].time_scheduler();
-
-        elif self.state_map[message.channel.id] == 2 and message.content[:10] == '$timezone ':
-            print("Debug: Entered Timezone", message.content[:10])
-            # try:
-            self.time_map[message.channel.id] = time_difference.Time(message.content[10:])
+            if message.channel.id not in self.time_map:
+                self.time_map[message.channel.id] = time_difference.Time('UTC')
 
             self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id,
                                                           self.role_list[message.channel.id],
@@ -250,14 +254,21 @@ class WerewolfBot(discord.Client):
             self.sched_map[message.channel.id] = scheduler.Scheduler(self, self.time_map[message.channel.id],
                                                                      self.game_map[message.channel.id])
 
-            self.state_map[message.channel.id] = 3
+            self.state_map[message.channel.id] = 2
 
             await self.sched_map[message.channel.id].initialize()
 
             await message.channel.send('Thank you for playing :)')
             for player_id in self.game_map[message.channel.id].players_list:
                 self.in_game_map[player_id].remove(message.channel.id)
+
+            await self.game_broadcast(message.channel.id, "The game has ended. Use `$setup` to start another game")
             self.state_map.pop(message.channel.id)
+
+        # TODO INITIALIZE GAME HERE
+        # TODO: ENTER TIME ZONE
+        # self.game_map[message.channel.id] = game.Game(self, self.player_map[message.channel.id], message.channel.id, self.role_list[message.channel.id], 'Europe/Berlin')
+        # await self.game_map[message.channel.id].time_scheduler();
 
         # except:
         #    await message.channel.send('Unknown timezone. Enter your timezone using `$timezone TIMEZONE`. Common timezones may be UTC, CET, Europe/Berlin, America/New_York, Asia/Dubai. For a list of all accepted timezones visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones and search the third column.')
@@ -265,14 +276,14 @@ class WerewolfBot(discord.Client):
     # Debug stuff
     async def debug_commands(self, message):
 
-        if message.content == '.next':
+        if message.content in ('.next', '.n'):
             print("Debug: Skip to next event")
             self.sched_map[message.channel.id].debug = 1
 
     # Get information about roles or presets
     async def information_calls(self, message):
         # User writes $list and gets a display of all roles
-        if message.content == '$rolelist':
+        if message.content in ('$rl', '$rolelist'):
             print("Debug: List all roles")
             role_list_message_content = 'The following roles exist'
             role_list_message_content += "\n\nTown aligned roles:```"
@@ -285,22 +296,23 @@ class WerewolfBot(discord.Client):
             await message.channel.send(role_list_message_content + "```")
             return True
 
-        if message.content[:6] == "$info ":
-            print("Debug: Get info on", message.content[6:].title())
-            if message.content[6:].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)):
+        if message.content.split(' ')[0] in ('$i', '$info'):
+            print("Debug: Get info on", message.content.split(' ')[1].title())
+            if message.content.split(' ')[1].lower() not in set(map(lambda x: x.__name__.lower(), roles.all_roles)) and \
+                    message.content.split(' ')[1].lower() != 'narrator':
                 await message.channel.send('Invalid role. Use `$rolelist` to see all roles')
                 return True
 
             data = datamanager.get_description()
-            if message.content[6:].upper() not in data:
+            if message.content.split(' ')[1].upper() not in data:
                 await message.channel.send('No role description available :(')
                 return True
-            stats = data[message.content[6:].upper()]
-            if message.content[6:].lower() == 'narrator':
+            stats = data[message.content.split(' ')[1].upper()]
+            if message.content.split(' ')[1].lower() == 'narrator':
                 color = 10066176
-            elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), roles.good_roles)):
+            elif message.content.split(' ')[1].lower() in set(map(lambda x: x.__name__.lower(), roles.good_roles)):
                 color = 52224
-            elif message.content[6:].lower() in set(map(lambda x: x.__name__.lower(), roles.evil_roles)):
+            elif message.content.split(' ')[1].lower() in set(map(lambda x: x.__name__.lower(), roles.evil_roles)):
                 color = 16711680
             else:
                 color = 7829367
@@ -313,8 +325,8 @@ class WerewolfBot(discord.Client):
             await message.channel.send("", embed=embed)
             return True
 
-        if message.content == '$games':
-            print("Debug: Get games", message.content[6:].title())
+        if message.content in ('$g', '$games'):
+            print("Debug: Get games", message.content.split(' ')[1].title())
             if message.author.id not in self.in_game_map or len(self.in_game_map[message.author.id]) == 0:
                 await message.channel.send("You don't have any games.")
             else:
@@ -323,12 +335,30 @@ class WerewolfBot(discord.Client):
                         self.in_game_map[message.author.id])))
             return True
 
+        if message.content in ('$h', '$help'):
+            await message.channel.send("Here is a list of all commands\n"
+                                       "- $help, $h | Shows this message\n"
+                                       "- $setup, $s | Starts a game\n"
+                                       "- $continue, $c | Finalize Player signup\n"
+                                       "- $presetlist, $pl | Show all presets\n"
+                                       "- $preset PRESET, $p PRESET | Choose PRESET as current preset\n"
+                                       "- $rolelist, $rl | Show all roles\n"
+                                       "- $addrole ROLE, $ar ROLE | Add a role to the rolelist\n"
+                                       "- $delrole ROLE, $dr ROLE | Remove a role from the rolelist\n"
+                                       "- $current, $cr | List all roles currently in the rolelist\n"
+                                       "- $info ROLE, $i ROLE | Show a roles rolecard\n"
+                                       "- $done, $d | finalize rolelist\n"
+                                       "- $timezone TIME, $tz TIME | sets the current timezone. View https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for all timezones\n"
+                                       "- $presetinfo, $pi | Show the roles a preset contains\n"
+                                       "- $games, $g | Show the games you are part of\n"
+                                       "- $player, $p | Show currently alive players\n")
+
         return False
 
     # Global game calls
     async def global_calls(self, message):
         if message.content == "$players":
-            message.channel.send(self.game_map[message.channel.id].get_player_list())
+            await message.channel.send(self.game_map[message.channel.id].get_player_list())
 
     # Parse direct messages
     async def parse_player_message(self, message):
@@ -388,11 +418,6 @@ class WerewolfBot(discord.Client):
         if self.get_user(user_id).dm_channel is None:
             await self.get_user(user_id).create_dm()
         await self.get_user(user_id).dm_channel.send(message)
-
-    # End the game
-    async def end_game(self, game_id):
-        await self.game_broadcast(game_id, "The game has ended. Use `$setup` to start another game")
-        await self.state_map.pop(game_id)
 
 
 if not datamanager.check_json():
