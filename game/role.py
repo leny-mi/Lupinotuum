@@ -1,5 +1,3 @@
-import asyncio
-
 from game.flags import Flags
 
 
@@ -13,7 +11,7 @@ class Role:
         self.vote_for = None  # Player INDEX to vote for
         self.group_master = []
 
-    async def on_private_message(self, game, message):
+    async def on_private_message(self, game, channel, message):
         print(self.player.name, ": ", message)
 
         if message == 'players':
@@ -21,16 +19,9 @@ class Role:
             await game.interface.game_direct(self.player.player_id,
                                              "The following players are still in the game:\n" + game.get_player_list())
 
-        if message.startswith('vote ') and Flags.VOTE_READY in self.flags:
-            try:
-                self.vote_for = int(message.split(' ')[1])
-                await game.interface.game_direct(self.player.player_id,
-                                                 "You have voted for " + game.get_player_obj_at(self.vote_for).name)
-            except ValueError:
-                await game.interface.game_direct(self.player.player_id,
-                                                 "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
+        await self.do_vote_action(game, channel, message, flag=Flags.VOTE_READY)
 
-    async def on_group_message(self, game, message):
+    async def on_group_message(self, game, channel, message):
         if message == 'players':
             print("Debug: List Players")
             await game.interface.game_direct(self.player.player_id,
@@ -118,19 +109,20 @@ class Role:
         # TODO: you have been graced
         self.flags.add(Flags.GRACED)
 
-    async def do_vote_action(self, game, message, flag=Flags.VOTE_READY):
+    async def do_vote_action(self, game, channel, message, flag=Flags.VOTE_READY):
         if message.startswith('vote ') and flag in self.flags:
             try:
                 value = int(message.split(' ')[1])
                 if not game.get_player_obj_at(value).is_alive:
-                    await game.interface.game_direct(self.player.player_id,
-                                                     "Chosen player is not alive. Please choose a player who is still in the game.")
+                    await channel.send("Chosen player is not alive. Please choose a player who is still in the game.")
                     return
                 self.vote_for = value
                 print("Debug:", self.player.name, "voted for", self.vote_for)
+                await channel.send("You have voted for " + game.get_player_obj_at(value).name)
             except ValueError:
-                await game.interface.game_direct(self.player.player_id,
-                                                 "Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` for example")
+                await channel.send(
+                    'Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` '
+                    'for example')
             except IndexError:
                 await game.interface.game_direct(self.player.player_id, "Incorrect player index")
 
