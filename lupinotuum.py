@@ -70,7 +70,8 @@ class WerewolfBot(discord.Client):
         # Group message
         if message.channel.type == discord.ChannelType.text and message.channel.category_id == self.category_id:
             # TODO: Route to guild
-            await self.group_game[message.channel.id].player_objs[message.author.id].role.on_group_message(self.group_game[message.channel.id], message.content.split('$')[1])
+            await self.group_game[message.channel.id].player_objs[message.author.id].role.on_group_message(
+                self.group_game[message.channel.id], message.channel, message.content.split('$')[1])
             return
 
         # User starts game setup
@@ -127,7 +128,7 @@ class WerewolfBot(discord.Client):
         # Set a preset
         elif self.state_map[message.channel.id] == 1 and message.content[:8] == '$preset ':
             self.role_list[message.channel.id] = presets.get_preset(message.content[8:],
-                                                                           self.count_map[message.channel.id] + 1)
+                                                                    self.count_map[message.channel.id] + 1)
             await message.channel.send("Set preset to " + message.content[8:])
 
         # Get all presets
@@ -377,6 +378,7 @@ class WerewolfBot(discord.Client):
         print("Debug: In Games:", games)
         print("Debug: Game has players:", self.game_map[games[0]].player_objs.keys())
         await self.game_map[games[0]].player_objs[message.author.id].role.on_private_message(self.game_map[games[0]],
+                                                                                             message.channel,
                                                                                              message.content.split('$')[
                                                                                                  1])
 
