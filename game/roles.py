@@ -5,6 +5,7 @@ from game.flags import Flags
 # Good Roles
 
 class Good(role.Role):
+    alive_alignment = "Village"
     pass
 
 
@@ -124,8 +125,10 @@ class Vampire(Evil):
 
 class Werewolf(Evil):
 
+    alive_alignment = "Werewolf"
+
     async def on_group_message(self, game, channel, message):
-        await super(Werewolf, self).on_group_message(game, None, message)
+        await super(Werewolf, self).on_group_message(game, channel, message)
         print("Debug: Got group message", message)
         await self.do_vote_action(game, channel, message, flag=Flags.ABILITY_READY)
 
@@ -139,6 +142,10 @@ class Werewolf(Evil):
         self.flags.add(Flags.ABILITY_READY)
         if self == game.groups[self.__class__.__name__].master:
             game.groups[self.__class__.__name__].votes = {}
+            await game.groups[self.__class__.__name__].channel.send("The night has started. You may vote on a target using "
+                                                              "`$vote PLAYER`. Use `$players` to get a list of all "
+                                                              "living players. Vote by " +
+                                                              game.time.get_next_time_string(23, 0))
 
     async def on_postnight(self, game):
         self.flags.remove(Flags.ABILITY_READY)

@@ -82,6 +82,10 @@ class WerewolfBot(discord.Client):
             await message.channel.send('Game is already running. There can only be one game per text channel.')
             return
 
+        elif message.channel.type == discord.ChannelType.text:  # Send a message only on $setup to avoid confusion
+            # TODO: Global Calls
+            pass
+
         # else: Route Message to role (io -> game -> player -> role -> on_message)
         if message.channel.type == discord.ChannelType.private:
             await self.parse_player_message(message)
@@ -250,7 +254,7 @@ class WerewolfBot(discord.Client):
 
             await self.sched_map[message.channel.id].initialize()
 
-            await message.channel.send('The game has ended. Thank you for playing :)')
+            await message.channel.send('Thank you for playing :)')
             for player_id in self.game_map[message.channel.id].players_list:
                 self.in_game_map[player_id].remove(message.channel.id)
             self.state_map.pop(message.channel.id)
@@ -320,6 +324,11 @@ class WerewolfBot(discord.Client):
             return True
 
         return False
+
+    # Global game calls
+    async def global_calls(self, message):
+        if message.content == "$players":
+            message.channel.send(self.game_map[message.channel.id].get_player_list())
 
     # Parse direct messages
     async def parse_player_message(self, message):

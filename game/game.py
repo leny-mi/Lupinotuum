@@ -5,6 +5,7 @@ from game import player
 
 from usable import group
 
+
 class Game:
 
     def __init__(self, interface, player_list, game_id, character_list, time):
@@ -33,12 +34,13 @@ class Game:
         # Distribute roles to players
         random.shuffle(role_choice)
         for role, player_id in zip(role_choice, self.players_list):
-            username = self.interface.get_user(player_id).name
-            self.player_objs[player_id] = (player.Player(player_id, role, name=username))
+            user = self.interface.get_user(player_id)
+            name = user.display_name + " (@" + user.name + "#" + user.discriminator + ")"
+            self.player_objs[player_id] = (player.Player(player_id, role, name=name))
         await self.interface.game_broadcast(self.id, "Initializing game")
         for concrete_player in self.sort_players():
             await concrete_player.role.on_game_start(self)
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_day(self):
         # TODO Day stuff
@@ -50,7 +52,7 @@ class Game:
         self.to_die = None
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_sunrise(self)
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_vote(self):
         # TODO Vote stuff
@@ -59,7 +61,7 @@ class Game:
         await self.interface.game_broadcast(self.id, "Vote has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_votestart(self)
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_voteend(self):
         # TODO Defense stuff
@@ -71,7 +73,8 @@ class Game:
         max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
         print("Debug: max_votes =", max_votes)
         print("Debug: votes =", self.votes)
-        most_voted = list(filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
+        most_voted = list(
+            filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
         print("Debug: most_voted =", most_voted)
 
         if len(most_voted) > 1:
@@ -92,13 +95,13 @@ class Game:
             for concrete_player in self.sort_players(only_alive=True):
                 await concrete_player.role.on_deathrow(self, self.to_die)
 
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_tiebreaker(self):
         # TODO Tiebreaker stuff
         print("Debug: Tiebreaker has started")
         if self.tie == 0:
-            return
+            return await self.phase_end()
 
         await self.interface.game_broadcast(self.id, "Tiebreaker has started")
 
@@ -109,14 +112,15 @@ class Game:
 
         max_votes = max(self.votes.values()) if len(self.votes.values()) > 0 else 0
         print("Debug: max_votes =", max_votes)
-        most_voted = list(filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
+        most_voted = list(
+            filter(lambda x: self.votes.get(x.player_id, 0) == max_votes, self.sort_players(only_alive=True)))
         print("Debug: most_voted =", most_voted)
 
         if len(most_voted) > 1:
-            await self.interface.game_broadcast(self.id, "There has been a tie between" + " and ".join(
+            await self.interface.game_broadcast(self.id, "There has been a tie between " + " and ".join(
                 [", ".join(list(map(lambda x: x.name, most_voted[:-1]))),
                  most_voted[-1].name]) + "\nNo one will die today...")
-            return
+            return await self.phase_end()
 
         else:
             # TODO: PRINT ALL VOTES
@@ -127,16 +131,16 @@ class Game:
             for concrete_player in self.sort_players(only_alive=True):
                 await concrete_player.role.on_deathrow(self, self.to_die)
 
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_hanging(self):
         print("Debug: Hanging has started")
         if self.to_die is None:
-            return
+            return await self.phase_end()
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_hang(self, self.to_die)
         # await self.interface.game_broadcast(self.id, self.to_die.name + " has been hanged.")
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_night(self):
         # TODO Night stuff
@@ -144,16 +148,31 @@ class Game:
         await self.interface.game_broadcast(self.id, "Night has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_nightfall(self)
-        await self.refresh_groups()
+        return await self.phase_end()
 
     async def commence_postnight(self):
         # TODO Vote stuff
         print("Debug: Postnight has started")
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_postnight(self)
-        await self.refresh_groups()
+        return await self.phase_end()
 
-    #
+    async def commence_gameend(self):
+        # TODO: Clean up database here
+        print("Debug: Commence game end")
+        last_alignment = None
+        for concrete_player in self.consistent_player_list(only_alive=True):
+            if last_alignment is None:
+                last_alignment = concrete_player.role.alive_alignment
+            assert(last_alignment == concrete_player.role.alive_alignment)
+
+        winners = list(filter(lambda x: x.role.early_win or x.role.alive_alignment == last_alignment, self.consistent_player_list(only_alive=True)))
+        await self.interface.game_broadcast(self.id, " and ".join(
+                [", ".join(list(map(lambda x: x.name, winners[:-1]))),
+                 winners[-1].name]) + " won the game.")
+
+        # TODO: Maybe broadcast role list
+
     async def player_die(self, dead_player, murderer):
         for concrete_player in self.sort_players(only_alive=True):
             await concrete_player.role.on_playerdeath(self, dead_player, murderer)
@@ -165,9 +184,26 @@ class Game:
         self.groups[group_bind] = g
         return g
 
+    async def phase_end(self):
+        await self.refresh_groups()
+        if await self.check_win():
+            await self.commence_gameend()
+            return False
+        return True
+
     async def refresh_groups(self):
         for concrete_group in self.groups.values():
             await concrete_group.refresh_members()
+
+    async def check_win(self):
+        print("Debug: Check game end")
+        last_alignment = None
+        for concrete_player in self.consistent_player_list(only_alive=True):
+            if last_alignment is None:
+                last_alignment = concrete_player.role.alive_alignment
+            if last_alignment != concrete_player.role.alive_alignment:
+                return False
+        return True
 
     def sort_players(self, only_alive=False):
         players = list(map(lambda y: self.player_objs[y], list(self.players_list)))
@@ -194,4 +230,4 @@ class Game:
         return self.get_player_obj_at(n).player_id
 
     def get_player_obj_at(self, n):
-        return self.sort_players(only_alive=False)[n - 1]
+        return self.consistent_player_list(only_alive=False)[n - 1]

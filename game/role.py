@@ -3,6 +3,8 @@ from game.flags import Flags
 
 class Role:
 
+    alive_alignment = None
+
     def __init__(self, player):
         self.player = player  # Reference to this player
         self.flags = set()  # Set of this roles flags
@@ -10,6 +12,7 @@ class Role:
 
         self.vote_for = None  # Player INDEX to vote for
         self.group_master = []
+        self.early_win = False
 
     async def on_private_message(self, game, channel, message):
         print(self.player.name, ": ", message)
@@ -24,8 +27,9 @@ class Role:
     async def on_group_message(self, game, channel, message):
         if message == 'players':
             print("Debug: List Players")
-            await game.interface.game_direct(self.player.player_id,
-                                             "The following players are still in the game:\n" + game.get_player_list())
+            await channel.send("The following players are still in the game:\n" + game.get_player_list())
+            #await game.interface.game_direct(self.player.player_id,
+             #                                "The following players are still in the game:\n" + game.get_player_list())
         print("In Group", message)
 
     async def on_game_start(self, game):
@@ -51,7 +55,7 @@ class Role:
 
     async def on_defense(self, game, tied_players):
         if self.player in tied_players:
-            await game.interface.game_direct(self.player.id,
+            await game.interface.game_direct(self.player.player_id,
                                              "You are on trial. You may defend yourself to escape death.")
 
     async def on_deathrow(self, game, player):
@@ -63,15 +67,15 @@ class Role:
 
     async def on_hang(self, game, player):
         # TODO: you have been hanged
+        print("Debug: "+self.player.name + " received hanging of " + player.name)
         if self.player == player:
             if Flags.GRACED in self.flags:
                 await game.interface.game_broadcast(game.id, self.player.name + " has been graced.")
             else:
                 await game.interface.game_broadcast(game.id,
                                                     self.player.name + " has been hanged. They have been a " + self.player.role.__class__.__name__.title())
-                self.player.alive = False
+                self.player.is_alive = False
                 await game.player_die(self.player, None)
-            pass
 
     async def on_playerdeath(self, game, player, murderer):
         # game.players_alive.remove(player)
@@ -87,7 +91,7 @@ class Role:
 
     async def on_changerole(self, game, role):
         self.player.role = role(self.player)
-        await game.interface.game_direct(self.player.id,
+        await game.interface.game_direct(self.player.player_id,
                                          "Your role has been changed to " + self.player.role.__class__.__name__.title())
 
     async def on_inhibit(self, game):
@@ -116,14 +120,17 @@ class Role:
                 if not game.get_player_obj_at(value).is_alive:
                     await channel.send("Chosen player is not alive. Please choose a player who is still in the game.")
                     return
+                if self.vote_for is None:
+                    await channel.send("You have voted for " + game.get_player_obj_at(value).name + ".")
+                else:
+                    await channel.send("You have voted for " + game.get_player_obj_at(value).name + " instead.")
                 self.vote_for = value
                 print("Debug:", self.player.name, "voted for", self.vote_for)
-                await channel.send("You have voted for " + game.get_player_obj_at(value).name)
             except ValueError:
                 await channel.send(
                     'Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` '
-                    'for example')
+                    'for example.')
             except IndexError:
-                await game.interface.game_direct(self.player.player_id, "Incorrect player index")
+                await game.interface.game_direct(self.player.player_id, "Incorrect player index.")
 
     # def do_choose(self, game, message, flag )

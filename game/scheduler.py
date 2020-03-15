@@ -59,19 +59,26 @@ class Scheduler:
 
         while True:  # Edit to end at game end
             await self.sleep_until(8, 0)
-            await self.game_obj.commence_day()
+            if not await self.game_obj.commence_day():
+                break
             await self.sleep_until(17, 30)
-            await self.game_obj.commence_vote()
+            if not await self.game_obj.commence_vote():
+                break
             await self.sleep_until(18, 40)
-            await self.game_obj.commence_voteend()
+            if not await self.game_obj.commence_voteend():
+                break
             await self.sleep_until(19, 0)
-            await self.game_obj.commence_tiebreaker()
+            if not await self.game_obj.commence_tiebreaker():
+                break
             await self.sleep_until(19, 30)
-            await self.game_obj.commence_hanging()
+            if not await self.game_obj.commence_hanging():
+                break
             await self.sleep_until(20, 0)
-            await self.game_obj.commence_night()
+            if not await self.game_obj.commence_night():
+                break
             await self.sleep_until(23, 0)
-            await self.game_obj.commence_postnight()
+            if not await self.game_obj.commence_postnight():
+                break
 
     async def sleep_until(self, hour, minute):
         secs = self.time.seconds_until(hour, minute)
