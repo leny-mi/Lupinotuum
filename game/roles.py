@@ -25,7 +25,9 @@ class Hunter(Good):
         await super(Hunter, self).on_deathrow(game, player)
         if player == self.player:
             self.flags.add(Flags.ABILITY_READY)
-            await game.interface.game_direct(self.player.player_id, "You will die today. You can choose a player to kill before dying using `$kill PLAYER`. Choose by " + game.time.get_next_time_string(19, 30))
+            await game.interface.game_direct(self.player.player_id,
+                                             "You will die today. You can choose a player to kill before dying using `$kill PLAYER`. Choose by " + game.time.get_next_time_string(
+                                                 19, 30))
 
     async def on_postnight(self, game):
         await super(Hunter, self).on_postnight(game)
@@ -37,15 +39,15 @@ class Hunter(Good):
                        game.sort_players(only_alive=True)))
             if len(most_voted) == 1 and most_voted[0] == self.player:
                 self.flags.add(Flags.ABILITY_READY)
-                await game.interface.game_direct(self.player.player_id, "You will die tomorrow. You can choose a player to kill before dying using `$kill PLAYER`. Choose by " + game.time.get_next_time_string(8, 0))
+                await game.interface.game_direct(self.player.player_id,
+                                                 "You will die tomorrow. You can choose a player to kill before dying using `$kill PLAYER`. Choose by " + game.time.get_next_time_string(
+                                                     8, 0))
 
     async def on_playerdeath(self, game, player, murderer):
         await super(Hunter, self).on_playerdeath(game, player, murderer)
         if player == self.player:
             if hasattr(self, 'to_kill'):
                 await self.to_kill.role.on_attacked(game, self, False)
-
-
 
 
 class Guardian_Angel(Good):
@@ -268,12 +270,31 @@ class Vampire(Evil):
 
 class Werewolf(Evil):
     alive_alignment = "Werewolf"
-    most_voted: player.Player
 
     async def on_group_message(self, game, channel, message):
         await super(Werewolf, self).on_group_message(game, channel, message)
         print("Debug: Got group message", message)
-        await self.do_vote_action(game, channel, message, flag=Flags.ABILITY_READY)
+        if message.startswith('vote ') and Flags.ABILITY_READY in self.flags:
+            try:
+                value = int(message.split(' ')[1])
+                if not game.get_player_obj_at(value).is_alive:
+                    await channel.send("Chosen player is not alive. Please choose a player who is still in the game.")
+                    return
+                if self.vote_for is None:
+                    game.groups[self.__class__.__name__].add_vote(value, 1)
+                    await channel.send("You have voted for " + game.get_player_obj_at(value).name + ".")
+                else:
+                    game.groups[self.__class__.__name__].add_vote(self.vote_for, -1)
+                    game.groups[self.__class__.__name__].add_vote(value, 1)
+                    await channel.send("You have voted for " + game.get_player_obj_at(value).name + " instead.")
+                self.vote_for = value
+                print("Debug:", self.player.name, "voted for", self.vote_for)
+            except ValueError:
+                await channel.send(
+                    'Incorrect command. Use `$vote NUMBER` to vote for a player. To vote for Player 2 use `$vote 2` '
+                    'for example.')
+            except IndexError:
+                await game.interface.game_direct(self.player.player_id, "Incorrect player index.")
 
     async def on_game_start(self, game):
         await super(Werewolf, self).on_game_start(game)
@@ -297,11 +318,7 @@ class Werewolf(Evil):
         await super(Werewolf, self).on_postnight(game)
         self.flags.remove(Flags.ABILITY_READY)
         if Flags.INHIBITED not in self.flags:
-            if self.vote_for is not None:
-                if self.vote_for not in game.groups[self.__class__.__name__].votes:
-                    game.groups[self.__class__.__name__].votes[game.get_player_obj_at(self.vote_for)] = 0
-                game.groups[self.__class__.__name__].votes[game.get_player_obj_at(self.vote_for)] += 1
-                self.vote_for = None
+            # TODO: Find a way to inhibit a werewolf
             max_votes = max(game.groups[self.__class__.__name__].votes.values()) if len(
                 game.groups[self.__class__.__name__].votes.values()) > 0 else 0
             print("Debug: max_votes =", max_votes)
@@ -310,18 +327,16 @@ class Werewolf(Evil):
                        game.sort_players(only_alive=True)))
             print("Debug: most_voted =", self.most_voted)
         else:
-            await game.interface.game_direct(self.player.player_id, "You have been inhibited. You did not execute your role this night.")
+            await game.interface.game_direct(self.player.player_id,
+                                             "You have been inhibited. You did not execute your role this night.")
 
     async def on_sunrise(self, game):
         await super(Werewolf, self).on_sunrise(game)
         if self == game.groups[self.__class__.__name__].master:
-            try:
-                if len(self.most_voted) > 1:
-                    await game.groups[self.__class__.__name__].channel.send("No majority reached.")
-                else:
-                    await self.most_voted[0].role.on_attacked(game, self)
-            except:
-                pass
+            if len(game.groups[self.__class__.__name__].most_voted) > 1:
+                await game.groups[self.__class__.__name__].channel.send("No majority reached.")
+            else:
+                await game.get_player_obj_at(game.groups[self.__class__.__name__].most_voted[0]).role.on_attacked(game, self)
 
 
 class Witch(Evil):

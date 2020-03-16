@@ -13,6 +13,7 @@ class Group:
         self.channel = None
         self.master = master
         self.votes = {}  # Dict of votes
+        self.most_voted = None
 
     async def instantiate_channel(self, game):
         category = self.client.get_channel(self.client.category_id)
@@ -44,3 +45,9 @@ class Group:
 
     def get_id(self):
         return self.channel.id
+
+    def add_vote(self, player, count):
+        if player not in self.votes:
+            self.votes[player] = 0
+        self.votes[player] += count
+        self.most_voted = list(filter(lambda x: self.votes.get(x, 0) == max(self.votes.values()), self.votes.keys()))
